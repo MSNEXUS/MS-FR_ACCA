@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FR Notes Hub — M.Shanu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#151310; --paper-card:#1C1915; --paper-alt:#211D17;
+  --border:#3A3226;
+  --ink:#EDE8DC; --ink-soft:#B9B2A0; --ink-mute:#7C7566;
+  --accent:#5CBB98; --accent-soft:#182A22; --accent-line:#2E4C40;
+  --gold:#E0B24E; --gold-soft:#2C2413; --gold-line:#5C4A22;
+  --trap:#E58278; --trap-soft:#2E1D1A; --trap-line:#5A342E;
+  --formula:#8FB4E3; --formula-soft:#182230; --formula-line:#2C4258;
+  --why:#C3ACEB; --why-soft:#221C30; --why-line:#3E3156;
+  --side-bg:#0F1713; --side-bg-alt:#182620; --side-text:#C7D0C7; --side-text-dim:#66756B;
+  --side-active:#22352C; --side-accent:#79C6A0;
+  --font-head:'Fraunces', serif; --font-body:'Source Sans 3', sans-serif; --font-mono:'IBM Plex Mono', monospace;
+  --radius:10px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; font-family:var(--font-body); background:var(--paper); color:var(--ink); font-size:17px; line-height:1.65;}
+#progressbar{position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--accent),var(--side-accent)); z-index:999; width:0%;}
+
+.app{display:flex; min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+  width:290px; flex-shrink:0; background:var(--side-bg); color:var(--side-text);
+  position:sticky; top:0; height:100vh; overflow-y:auto; padding:20px 14px 40px;
+  border-right:1px solid #0a0f0c; transition:margin-left .22s ease, opacity .22s ease;
+}
+.sidebar::-webkit-scrollbar{width:6px;} .sidebar::-webkit-scrollbar-thumb{background:var(--side-bg-alt); border-radius:3px;}
+body.nav-collapsed .sidebar{margin-left:-290px; opacity:0; pointer-events:none;}
+.brand{font-family:var(--font-head); font-weight:700; font-size:21px; color:#F1EFE4; padding:4px 8px 2px;}
+.brand span{color:var(--side-accent);}
+.brand-sub{font-family:var(--font-mono); font-size:10.5px; color:var(--side-text-dim); padding:0 8px 16px; letter-spacing:.5px;}
+.pillar-label{
+  font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:1.2px;
+  color:var(--side-text-dim); margin:18px 8px 6px; padding-top:10px; border-top:1px solid #1c2620;
+}
+.pillar-label:first-of-type{border-top:none; margin-top:6px;}
+.navlink{
+  display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:7px; font-size:13.5px;
+  color:var(--side-text); text-decoration:none; cursor:pointer; margin:1px 0;
+}
+.navlink:hover{background:var(--side-bg-alt);}
+.navlink.active{background:var(--side-active); color:#fff; font-weight:600;}
+.navlink .dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+.dot.done{background:var(--side-accent);}
+.dot.queued{background:#3d463f; border:1px solid #2a322c;}
+.navlink.hidden{display:none;}
+
+/* MAIN */
+main{flex:1; min-width:0; transition:margin-left .22s ease;}
+.topbar{
+  position:sticky; top:0; z-index:50; background:rgba(21,19,16,.94); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border); padding:10px 30px; display:flex; align-items:center; gap:16px;
+}
+#hamburger{
+  background:var(--paper-card); border:1px solid var(--border); color:var(--ink-soft); font-size:16px;
+  width:36px; height:36px; border-radius:8px; cursor:pointer; flex-shrink:0;
+}
+#hamburger:hover{color:var(--accent); border-color:var(--accent-line);}
+.topsearch-wrap{position:relative; flex-shrink:0; width:280px;}
+#topsearch{
+  width:100%; background:var(--paper-card); border:1px solid var(--border); color:var(--ink);
+  padding:8px 12px; border-radius:8px; font-family:var(--font-body); font-size:14px; outline:none;
+}
+#topsearch:focus{border-color:var(--accent);}
+#topsearch-results{
+  position:absolute; top:calc(100% + 6px); left:0; width:340px; max-height:360px; overflow-y:auto;
+  background:var(--paper-card); border:1px solid var(--border); border-radius:10px; box-shadow:0 18px 40px rgba(0,0,0,.5);
+  display:none; z-index:60;
+}
+#topsearch-results.active{display:block;}
+.tsr-item{padding:9px 14px; font-size:13.5px; cursor:pointer; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px;}
+.tsr-item:last-child{border-bottom:none;}
+.tsr-item:hover{background:var(--paper-alt); color:var(--accent);}
+.topbar-label{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-mute); letter-spacing:.5px;}
+.pillar-jump{display:flex; gap:6px; flex-shrink:0;}
+.pjump-btn{
+  font-family:var(--font-mono); font-size:12px; padding:7px 12px; border-radius:8px;
+  background:var(--paper-card); border:1px solid var(--border); color:var(--ink-soft); cursor:pointer;
+  -webkit-appearance:none; appearance:none;
+}
+.pjump-btn:hover{color:var(--accent); border-color:var(--accent-line); background:var(--accent-soft);}
+
+.content{max-width:800px; margin:0 auto; padding:44px 48px 100px;}
+
+.hero h1{font-family:var(--font-head); font-weight:700; font-size:44px; margin:0 0 8px; letter-spacing:-.5px; color:var(--ink);}
+.hero p{color:var(--ink-soft); font-size:18px; max-width:620px;}
+.legend{display:flex; gap:22px; margin:22px 0 0; font-size:14px; color:var(--ink-soft);}
+.legend span{display:inline-flex; align-items:center; gap:6px;}
+.legend .dot{width:9px; height:9px; border-radius:50%;}
+.dot-done{background:var(--accent);} .dot-queued{background:var(--ink-mute);}
+hr.rule{border:none; border-top:1px solid var(--border); margin:44px 0;}
+
+.pillar-heading{font-family:var(--font-head); font-weight:600; font-size:15px; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent); margin:56px 0 18px;}
+
+/* LAUNCH GRID */
+.launch-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:30px;}
+.launch-card{
+  border:1px solid var(--border); border-radius:10px; padding:13px 15px; background:var(--paper-card);
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+}
+.launch-card .lname{font-weight:700; font-size:14.5px; color:var(--ink);}
+.launch-card .lref{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-mute); margin-top:2px;}
+.launch-btn{
+  font-family:var(--font-mono); font-size:11.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;
+  -webkit-appearance:none; appearance:none; margin:0; line-height:normal;
+  text-decoration:none; flex-shrink:0;
+}
+.launch-btn.done{background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line); cursor:pointer;}
+.launch-btn.done:hover{background:var(--accent-line);}
+.launch-btn.queued{background:var(--paper-alt); color:var(--ink-mute); border:1px solid var(--border); cursor:default;}
+
+.chapter{scroll-margin-top:76px; margin-bottom:70px;}
+.chapter h2.ctitle{font-family:var(--font-head); font-weight:700; font-size:34px; margin:0 0 4px; color:var(--ink);}
+.ctitle-sub{font-family:var(--font-mono); font-size:12.5px; color:var(--ink-mute); text-transform:uppercase; letter-spacing:.8px; margin-bottom:24px;}
+
+h3.sec{
+  font-family:var(--font-head); font-weight:600; font-size:22px; color:var(--ink); margin:32px 0 10px;
+  padding-bottom:6px; border-bottom:2px solid var(--accent-line);
+}
+h4.subsec{font-family:var(--font-body); font-weight:700; font-size:16.5px; color:var(--ink); margin:18px 0 6px;}
+p{margin:8px 0; color:var(--ink);}
+ul,ol{margin:8px 0 14px; padding-left:24px;}
+li{margin:4px 0;}
+
+.callout{border-radius:var(--radius); padding:14px 18px; margin:16px 0; border:1px solid;}
+.callout .ctag{font-family:var(--font-mono); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px; display:block;}
+.c-def{background:var(--accent-soft); border-color:var(--accent-line);} .c-def .ctag{color:var(--accent);}
+.c-formula{background:var(--formula-soft); border-color:var(--formula-line); font-family:var(--font-mono);} .c-formula .ctag{color:var(--formula); font-family:var(--font-body);}
+.c-trap{background:var(--trap-soft); border-color:var(--trap-line);} .c-trap .ctag{color:var(--trap);}
+.c-why{background:var(--why-soft); border-color:var(--why-line);} .c-why .ctag{color:var(--why);}
+.c-example{background:var(--gold-soft); border-color:var(--gold-line);} .c-example .ctag{color:var(--gold);}
+
+table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14.5px;}
+th,td{border:1px solid var(--border); padding:8px 12px; text-align:left; vertical-align:top;}
+th{background:var(--paper-alt); font-weight:700; font-size:13.5px;}
+.worked{font-family:var(--font-mono); font-size:14px; white-space:pre-wrap; background:var(--paper-alt); border:1px solid var(--border); border-radius:8px; padding:14px 16px; line-height:1.55; color:var(--ink-soft);}
+
+footer{text-align:center; padding:40px 20px 60px; color:var(--ink-mute); font-family:var(--font-mono); font-size:12.5px;}
+
+@media (max-width:900px){
+  body.nav-collapsed .sidebar{margin-left:-290px;}
+  .sidebar{position:fixed; z-index:200; height:100vh;}
+  .content{padding:36px 20px 80px;}
+  .launch-grid{grid-template-columns:1fr;}
+  .topsearch-wrap{width:140px;}
+  #topsearch-results{width:240px;}
+  .topbar-label{display:none;}
+  .pjump-btn{padding:7px 9px;}
+}
+</style>
+</head>
+<body class="nav-collapsed-mobile-init">
+<div id="progressbar"></div>
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">FR Notes <span>Hub</span></div>
+    <div class="brand-sub">© M.SHANU · STUDY EDITION</div>
+
+    <div class="pillar-label">Single Entity Financial Statements</div>
+    <div class="navlink" data-target="ias16" tabindex="0"><span class="dot done"></span>IAS 16 — PPE</div>
+    <div class="navlink" data-target="ias36" tabindex="0"><span class="dot done"></span>IAS 36 — Impairment</div>
+    <div class="navlink" data-target="ias38" tabindex="0"><span class="dot done"></span>IAS 38 — Intangibles</div>
+    <div class="navlink" data-target="ias40" tabindex="0"><span class="dot done"></span>IAS 40 — Investment Property</div>
+    <div class="navlink" data-target="ifrs5" tabindex="0"><span class="dot done"></span>IFRS 5 — Held for Sale</div>
+    <div class="navlink" data-target="ias23" tabindex="0"><span class="dot done"></span>IAS 23 — Borrowing Costs</div>
+    <div class="navlink" data-target="ias2" tabindex="0"><span class="dot done"></span>IAS 2 — Inventories</div>
+    <div class="navlink" data-target="ias41" tabindex="0"><span class="dot done"></span>IAS 41 — Agriculture</div>
+    <div class="navlink" data-target="ifrs15" tabindex="0"><span class="dot done"></span>IFRS 15 — Revenue</div>
+    <div class="navlink" data-target="ias20" tabindex="0"><span class="dot done"></span>IAS 20 — Grants</div>
+    <div class="navlink" data-target="ias12" tabindex="0"><span class="dot done"></span>IAS 12 — Income Tax</div>
+    <div class="navlink" data-target="ias21" tabindex="0"><span class="dot done"></span>IAS 21 — Forex</div>
+    <div class="navlink" data-target="fi" tabindex="0"><span class="dot done"></span>Financial Instruments</div>
+    <div class="navlink" data-target="ifrs16" tabindex="0"><span class="dot done"></span>IFRS 16 — Leases</div>
+    <div class="navlink" data-target="ias37" tabindex="0"><span class="dot done"></span>IAS 37 — Provisions</div>
+    <div class="navlink" data-target="ias33" tabindex="0"><span class="dot done"></span>IAS 33 — EPS</div>
+    <div class="navlink" data-target="ias7" tabindex="0"><span class="dot done"></span>IAS 7 — Cash Flows</div>
+    <div class="navlink" data-target="ias8" tabindex="0"><span class="dot done"></span>IAS 8 — Policies/Errors</div>
+    <div class="navlink" data-target="ias10" tabindex="0"><span class="dot done"></span>IAS 10 — Events After RP</div>
+    <div class="navlink" data-target="framework" tabindex="0"><span class="dot done"></span>Conceptual Framework</div>
+    <div class="navlink" data-target="ifrss1" tabindex="0"><span class="dot done"></span>IFRS S1 — Sustainability</div>
+
+    <div class="pillar-label">Group Accounting</div>
+    <div class="navlink" data-target="groups" tabindex="0"><span class="dot queued"></span>Intro to Groups</div>
+    <div class="navlink" data-target="csofp" tabindex="0"><span class="dot queued"></span>Consolidated SOFP</div>
+    <div class="navlink" data-target="csopl" tabindex="0"><span class="dot queued"></span>Consolidated SOPL</div>
+    <div class="navlink" data-target="acqdisp" tabindex="0"><span class="dot queued"></span>Acquisitions &amp; Disposals</div>
+    <div class="navlink" data-target="associates" tabindex="0"><span class="dot queued"></span>Associates</div>
+    <div class="navlink" data-target="grouptheory" tabindex="0"><span class="dot queued"></span>Group Theory</div>
+
+    <div class="pillar-label">Ratio Analysis &amp; Interpretation</div>
+    <div class="navlink" data-target="profitability" tabindex="0"><span class="dot queued"></span>Profitability</div>
+    <div class="navlink" data-target="liquidity" tabindex="0"><span class="dot queued"></span>Liquidity</div>
+    <div class="navlink" data-target="efficiency" tabindex="0"><span class="dot queued"></span>Efficiency</div>
+    <div class="navlink" data-target="gearing" tabindex="0"><span class="dot queued"></span>Gearing &amp; Investor</div>
+    <div class="navlink" data-target="drle" tabindex="0"><span class="dot queued"></span>Interpretation (DRLE)</div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button id="hamburger">☰</button>
+      <div class="topsearch-wrap">
+        <input id="topsearch" placeholder="Jump to a topic…" autocomplete="off">
+        <div id="topsearch-results"></div>
+      </div>
+      <div class="pillar-jump">
+        <button class="pjump-btn" data-target="pillar1">Pillar 1</button>
+        <button class="pjump-btn" data-target="pillar2">Pillar 2</button>
+        <button class="pjump-btn" data-target="pillar3">Pillar 3</button>
+      </div>
+      <div class="topbar-label">FR NOTES HUB · STUDY EDITION</div>
+    </div>
+    <div class="content">
+
+      <div class="hero" id="top">
+        <h1>FR Notes Hub</h1>
+        <p>A complete, in-depth study reference for ACCA Financial Reporting — built to be read once, properly, per topic. Not a revision capsule: every rule, every exception, every worked mechanic, and the reasoning behind it.</p>
+      </div>
+
+      <hr class="rule">
+
+      <div class="pillar-heading" id="pillar1">Pillar 1 · Single Entity Financial Statements</div>
+      <div class="launch-grid">
+        <div class="launch-card"><div><div class="lname">IAS 16 — PPE</div><div class="lref">Property, Plant &amp; Equipment</div></div><button class="launch-btn done" data-target="ias16">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 36 — Impairment</div><div class="lref">Impairment of Assets</div></div><button class="launch-btn done" data-target="ias36">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 38 — Intangibles</div><div class="lref">Intangible Assets</div></div><button class="launch-btn done" data-target="ias38">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 40 — Investment Property</div><div class="lref">Investment Property</div></div><button class="launch-btn done" data-target="ias40">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IFRS 5 — Held for Sale</div><div class="lref">Non-current Assets &amp; Discontinued Ops</div></div><button class="launch-btn done" data-target="ifrs5">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 23 — Borrowing Costs</div><div class="lref">Borrowing Costs</div></div><button class="launch-btn done" data-target="ias23">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 2 — Inventories</div><div class="lref">Inventories</div></div><button class="launch-btn done" data-target="ias2">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 41 — Agriculture</div><div class="lref">Agriculture</div></div><button class="launch-btn done" data-target="ias41">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IFRS 15 — Revenue</div><div class="lref">Revenue from Contracts</div></div><button class="launch-btn done" data-target="ifrs15">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 20 — Grants</div><div class="lref">Government Grants</div></div><button class="launch-btn done" data-target="ias20">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 12 — Income Tax</div><div class="lref">Income Taxes</div></div><button class="launch-btn done" data-target="ias12">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 21 — Forex</div><div class="lref">Foreign Exchange</div></div><button class="launch-btn done" data-target="ias21">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">Financial Instruments</div><div class="lref">IFRS 9 / IAS 32 / IFRS 7</div></div><button class="launch-btn done" data-target="fi">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IFRS 16 — Leases</div><div class="lref">Leases</div></div><button class="launch-btn done" data-target="ifrs16">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 37 — Provisions</div><div class="lref">Provisions &amp; Contingencies</div></div><button class="launch-btn done" data-target="ias37">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 33 — EPS</div><div class="lref">Earnings Per Share</div></div><button class="launch-btn done" data-target="ias33">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 7 — Cash Flows</div><div class="lref">Statement of Cash Flows</div></div><button class="launch-btn done" data-target="ias7">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 8 — Policies/Errors</div><div class="lref">Policies, Estimates &amp; Errors</div></div><button class="launch-btn done" data-target="ias8">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IAS 10 — Events After RP</div><div class="lref">Events After Reporting Period</div></div><button class="launch-btn done" data-target="ias10">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">Conceptual Framework</div><div class="lref">Framework</div></div><button class="launch-btn done" data-target="framework">Launch →</button></div>
+        <div class="launch-card"><div><div class="lname">IFRS S1</div><div class="lref">Sustainability Disclosures</div></div><button class="launch-btn done" data-target="ifrss1">Launch →</button></div>
+      </div>
+
+      <!-- ================= IAS 16 ================= -->
+      <div class="chapter" id="ias16">
+        <h2 class="ctitle">IAS 16 — Property, Plant &amp; Equipment</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 1</div>
+
+        <h3 class="sec">1. What counts as PPE, and why does it get its own standard</h3>
+        <p>PPE is <b>tangible</b> items held for use in production or supply of goods/services, for rental to others, or for administrative purposes, and expected to be used for <b>more than one accounting period</b>. The standard exists because these assets sit on the balance sheet for years — get the initial measurement wrong and every subsequent year's depreciation, and eventually the disposal gain/loss, is wrong too. That's why IAS 16 spends so much effort on getting the entry cost right.</p>
+
+        <div class="callout c-def"><span class="ctag">Recognition criteria</span>
+          An item is recognised as PPE only if <b>both</b>: (a) it's probable that future economic benefits associated with the item will flow to the entity, and (b) the cost can be measured reliably. If either fails, expense it to P&amp;L instead — this is why, for example, ambiguous safety expenditure sometimes gets challenged.
+        </div>
+
+        <h3 class="sec">2. Initial measurement — building up "cost"</h3>
+        <p>Cost is not just the invoice price. IAS 16 defines it as everything needed to get the asset to the location and condition necessary for it to operate as intended by management. The logic is simple: any cost that's <i>necessary</i> to bring the asset into use is part of acquiring it; any cost that's incurred <i>after</i> the asset is capable of operating, or that relates to running the business generally, is a period cost.</p>
+
+        <table>
+          <tr><th>Capitalise (part of cost)</th><th>Expense to P&amp;L</th></tr>
+          <tr><td>Purchase price, less trade discounts/rebates</td><td>Cash/settlement discounts for prompt payment (treated as other income, not a reduction of cost)</td></tr>
+          <tr><td>Import duties and non-refundable purchase taxes</td><td>General administrative overheads</td></tr>
+          <tr><td>Site preparation costs</td><td>Initial operating losses before the asset reaches planned performance</td></tr>
+          <tr><td>Initial delivery and handling costs</td><td>Costs of relocating or reorganising part/all of the entity's operations</td></tr>
+          <tr><td>Installation and assembly costs</td><td>Costs of introducing a new product/service (including advertising/promotion)</td></tr>
+          <tr><td>Testing costs, net of proceeds from selling any samples produced while testing</td><td>Staff training costs on the new asset</td></tr>
+          <tr><td>Professional fees (legal, architects, engineers)</td><td>Costs of opening a new facility</td></tr>
+          <tr><td>Present value of the estimated cost of dismantling, removing, and restoring the site (a "decommissioning" obligation), where a present obligation exists</td><td></td></tr>
+        </table>
+
+        <div class="callout c-why"><span class="ctag">Why the line is drawn there</span>
+          The dividing line is always: is this cost necessary to get the asset ready for its <i>intended use</i>? Once the asset is capable of operating as management intended, capitalisation stops — even if it isn't actually in use yet (e.g. still running in idle mode, or output isn't at full capacity). That's why initial operating losses are expensed: the asset is already "ready," so those losses are a trading result, not an acquisition cost.
+        </div>
+
+        <div class="callout c-formula"><span class="ctag">Decommissioning / restoration provisions (DRRC)</span>
+          On initial recognition: <b>Dr PPE cost / Cr Provision</b> — at the present value of the estimated future cash outflow.<br>
+          Each year after: unwind the discount — <b>Dr Finance cost (P&amp;L) / Cr Provision</b> — because the obligation is one year closer to settlement, so its present value has grown.<br>
+          The added asset cost is then depreciated like any other part of the asset — over its useful life.
+        </div>
+
+        <h3 class="sec">3. Subsequent expenditure — repair, or capitalise?</h3>
+        <p>The same recognition test from Section 1 applies to costs incurred <i>after</i> acquisition. Day-to-day servicing (labour, consumables, minor parts) doesn't meet it — those costs don't create additional future benefit beyond what was already expected, so they're expensed as incurred ("repairs and maintenance").</p>
+        <p>But replacing a significant component, or a major inspection/overhaul required to keep the asset usable, <i>does</i> meet the test — capitalise the new cost, and derecognise the carrying amount of whatever's being replaced (even if it was never separately identified/depreciated before — you estimate what its remaining carrying amount would have been).</p>
+
+        <div class="callout c-example"><span class="ctag">Worked example — the dry-dock mechanic</span>
+          A ship costs $50m and has a 20-year useful life, but marine regulations require a dry-dock overhaul every 5 years, currently estimated to cost $4m.
+          <div class="worked">Split on initial recognition:
+  Hull/structure component: $46m -> depreciate over 20 years
+  Inspection/overhaul component: $4m -> depreciate over 5 years
+
+At year 5, the dry-dock is carried out for (say) $4.5m:
+  Old inspection component is now fully depreciated (CA = nil)
+    -> nothing to derecognise, no gain/loss
+  New cost of $4.5m is capitalised as the new inspection
+    component, depreciated over the next 5-year cycle
+
+If the overhaul had happened at year 3 instead (early):
+  Old component CA = 4m x (2/5 remaining) = $1.6m
+  Derecognise: Dr P&L (loss on derecognition) $1.6m
+              Cr Inspection component          $1.6m
+  Then capitalise the new overhaul cost as usual.</div>
+        </div>
+
+        <h3 class="sec">4. Subsequent measurement — cost model vs. revaluation model</h3>
+        <p>This is an accounting policy choice made <b>per class</b> of asset (e.g. all land &amp; buildings together, but you could pick a different policy for plant &amp; equipment) — not asset-by-asset, because mixing models within a class would make the financial statements internally inconsistent.</p>
+        <ul>
+          <li><b>Cost model:</b> cost − accumulated depreciation − accumulated impairment.</li>
+          <li><b>Revaluation model:</b> fair value at the date of revaluation − subsequent accumulated depreciation − subsequent impairment.</li>
+        </ul>
+
+        <h3 class="sec">5. The revaluation model in detail</h3>
+        <p>Revalue with sufficient regularity that the carrying amount doesn't differ materially from fair value at the reporting date — for volatile assets (e.g. certain plant) this might mean annually; for stable assets (e.g. land) every 3-5 years may be enough.</p>
+
+        <div class="callout c-def"><span class="ctag">Gains and losses — the OCI/P&amp;L split</span>
+          <b>Gain</b> on revaluation → <b>OCI</b>, accumulated in a "revaluation surplus" within equity — <i>unless</i> the gain reverses a revaluation loss on that <i>same</i> asset that was previously recognised in P&amp;L, in which case that portion is recognised in P&amp;L first (reversing the earlier expense), and only any excess goes to OCI.<br><br>
+          <b>Loss</b> on revaluation → <b>P&amp;L</b> — <i>unless</i> there's an existing revaluation surplus for that same asset, in which case the loss is first set against that surplus (through OCI, reducing it), and only any loss beyond the surplus balance goes to P&amp;L.
+        </div>
+
+        <div class="callout c-why"><span class="ctag">Why gains don't just flow through profit</span>
+          A revaluation gain is unrealised — no transaction has occurred, nobody has actually received cash. Routing it through OCI rather than P&amp;L stops management from "manufacturing" profit simply by revaluing assets upward, while still reflecting the updated value on the balance sheet. It's a deliberate separation between performance (P&amp;L) and unrealised holding gains (OCI/equity).
+        </div>
+
+        <p>After a revaluation, depreciate the <i>revalued</i> amount over the asset's remaining useful life — depreciation doesn't stop just because the asset is now carried at fair value.</p>
+
+        <div class="callout c-trap"><span class="ctag">Trap — the reserves transfer is optional</span>
+          Depreciation charged on the revalued amount is higher than what would have been charged on original cost. Transferring that "excess depreciation" from the revaluation surplus to retained earnings each year (<b>Dr Revaluation surplus / Cr Retained earnings</b> — a reserves movement only, never through P&amp;L) is <b>an accounting policy choice, not a requirement</b>. Many exam scenarios assume it happens; check the question's wording.<br>
+          On disposal of a revalued asset, transfer whatever balance remains in the revaluation surplus for that asset straight to retained earnings — again, never through P&amp;L.
+        </div>
+
+        <h3 class="sec">6. Depreciation</h3>
+        <p>Depreciation is the systematic allocation of an asset's depreciable amount (cost or valuation, less residual value) over its useful life — it's an allocation of already-incurred cost to the periods that benefit from the asset, not an attempt to track fair value.</p>
+        <ul>
+          <li><b>Methods:</b> straight-line, reducing balance, or units of production — chosen to reflect the pattern in which the asset's economic benefits are expected to be consumed, not chosen for convenience.</li>
+          <li><b>Review at least annually:</b> useful life, residual value, and depreciation method must all be reviewed at each year-end. A change is accounted for <b>prospectively</b> as a change in accounting estimate under IAS 8 — it is <i>not</i> a prior period error, and nothing is restated.</li>
+          <li><b>Land</b> is normally not depreciated because it typically has an indefinite useful life — exceptions exist for quarries and sites used for landfill, where the economic benefit is genuinely consumed over time.</li>
+          <li><b>Component accounting:</b> where a single asset has significant parts with materially different useful lives (e.g. an aircraft's engines vs. its airframe, or a building's structure vs. its lifts), depreciate each part separately.</li>
+        </ul>
+
+        <div class="callout c-example"><span class="ctag">Modern exam framing</span>
+          Recent exam scenarios use a company's net-zero/climate commitments as the <i>trigger</i> for revising a depreciation estimate — e.g. a company that commits to retiring a fossil-fuel-powered asset five years earlier than originally planned. Treat it exactly like any other estimate revision: shorten the remaining useful life, recalculate the annual charge, apply prospectively from the date of the decision. The "climate" framing is just the scenario dressing — the mechanics are ordinary IAS 8.
+        </div>
+
+        <h3 class="sec">7. Special recognition situations</h3>
+        <ul>
+          <li><b>Self-constructed assets</b> — capitalised on the same principles as a purchased asset (materials, direct labour, allocated overheads necessary for construction), but exclude internal profit margins and the cost of abnormal amounts of wasted material or labour — those don't represent the cost of the asset, they represent inefficiency.</li>
+          <li><b>Exchange of assets</b> — measure the asset received at the fair value of the asset given up, unless the fair value of the asset received is more clearly evident, or the transaction lacks commercial substance (the risk/timing/amount of the entity's future cash flows aren't expected to change as a result), in which case use the carrying amount of the asset given up and recognise no gain or loss.</li>
+          <li><b>Safety and environmental equipment</b> — capitalised even though, on its own, it doesn't directly generate future economic benefits, because it enables the entity to derive benefits from <i>related</i> assets that it otherwise couldn't operate at all (e.g. a fire-suppression system required to legally operate a chemical plant).</li>
+          <li><b>Spare parts and servicing equipment</b> — capitalised as PPE if expected to be used for more than one period; otherwise carried as inventory.</li>
+        </ul>
+
+        <div class="callout c-example"><span class="ctag">Worked example — trade-in ("grossing up")</span>
+          An old delivery van with carrying amount $3,000 is traded in for $3,500 against a new van with a list price of $18,000. The entity pays the $14,500 balance in cash.
+          <div class="worked">Dr New van (at gross cost)        18,000
+   Cr Old van disposal account        3,000
+   Cr Cash                           14,500
+
+Dr Disposal account (old van CA)      3,000
+   Cr Old van — cost/NBV                3,000
+
+Profit on disposal = trade-in value allowed ($3,500)
+                      less carrying amount ($3,000) = $500 gain</div>
+          The new van is recorded at its full list price (its "cost" for IAS 16 purposes), not just the cash paid — the trade-in allowance is effectively part of the consideration.
+        </div>
+
+        <h3 class="sec">8. Derecognition</h3>
+        <p>Derecognise an asset on disposal, or when no future economic benefits are expected from its use or subsequent disposal. The gain or loss on derecognition is the difference between net disposal proceeds and the carrying amount, recognised in P&amp;L — and it is <b>never</b> presented as revenue, even for an entity that regularly sells assets of that type as part of its ordinary activities (unless that activity is itself the entity's core business, e.g. an asset-rental company that routinely sells assets at the end of their rental term, which may fall under IFRS 15 instead).</p>
+
+        <div class="callout c-def"><span class="ctag">Compensation for impairment, loss, or giving up an asset</span>
+          If a third party compensates the entity for an item of PPE that was impaired, lost, or given up — an insurance payout after fire damage, or compensation for a compulsory purchase — that compensation is included in P&amp;L <b>when it becomes receivable</b>. It is never netted against the impairment/derecognition loss, and never deferred against the cost of any replacement asset — the two events (the loss, and the compensation) are recognised separately, in whichever periods they each become certain.
+        </div>
+
+        <h3 class="sec">9. Disclosure</h3>
+        <p>For each class of PPE, disclose:</p>
+        <ul>
+          <li>The measurement basis used (cost or revaluation)</li>
+          <li>Depreciation methods used, and the useful lives or depreciation rates applied</li>
+          <li>Gross carrying amount and accumulated depreciation at the beginning and end of the period</li>
+          <li>A reconciliation of the carrying amount at the start and end of the period, showing additions, disposals, acquisitions through business combinations, revaluation increases/decreases, impairment losses (and reversals), depreciation, and other movements</li>
+        </ul>
+        <div class="callout c-trap"><span class="ctag">Disclosures candidates routinely forget</span>
+          <ul>
+            <li>The existence and amount of restrictions on title, and PPE pledged as security for liabilities</li>
+            <li>The amount of contractual commitments for the acquisition of PPE</li>
+            <li>Compensation from third parties for items impaired, lost, or given up, if not separately disclosed within P&amp;L</li>
+            <li>For assets carried under the revaluation model specifically: the effective date of the revaluation, whether an independent valuer was involved, and the carrying amount that would have been recognised had the cost model been used instead</li>
+            <li>Any restrictions on the distribution of the revaluation surplus balance to shareholders</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ================= IAS 36 ================= -->
+      <div class="chapter" id="ias36">
+        <h2 class="ctitle">IAS 36 — Impairment of Assets</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 1</div>
+
+        <h3 class="sec">1. The objective, in plain terms</h3>
+        <p>IAS 16 tells you how to get an asset onto the books and depreciate it down over time on the assumption that it will keep earning at least as much as its carrying amount implies. IAS 36 is the check that catches it when that assumption stops being true — when an asset (or group of assets) is worth less to the business than its books currently say, even before its useful life runs out.</p>
+        <p>Scope exclusions exist because other standards already have their own, more specific impairment-equivalent mechanisms: inventories (IAS 2 — lower of cost and NRV), contract assets (IFRS 15), deferred tax assets (IAS 12), assets arising from employee benefits (IAS 19), financial assets (IFRS 9 — expected credit losses), investment property carried at fair value (IAS 40), biological assets at fair value less costs to sell (IAS 41), and non-current assets held for sale (IFRS 5, which has its own write-down rule to fair value less costs to sell).</p>
+
+        <h3 class="sec">2. When must you test</h3>
+        <ul>
+          <li><b>General rule:</b> test only when there's an indicator of impairment — assessed at every reporting date, for every asset in scope.</li>
+          <li><b>Mandatory annual test</b>, regardless of whether any indicator exists, for: goodwill; intangible assets with an indefinite useful life; and intangible assets not yet available for use (still under development).</li>
+        </ul>
+        <div class="callout c-trap"><span class="ctag">Goodwill acquired partway through the year</span>
+          If goodwill arises from an acquisition made during the current year, the CGU it's allocated to must still be tested for impairment <b>before the year end</b> — even if that falls before the entity's usual annual test date for other goodwill. You don't get to wait a full year before the first test.
+        </div>
+
+        <h3 class="sec">3. Indicators of impairment</h3>
+        <table>
+          <tr><th>External indicators</th><th>Internal indicators</th></tr>
+          <tr><td>Significant decline in the asset's market value, beyond what normal use/time would explain</td><td>Evidence of physical damage or obsolescence</td></tr>
+          <tr><td>Significant adverse changes in the technological, market, economic, or legal environment</td><td>The asset is idle, or there are plans to discontinue/restructure the operation it belongs to</td></tr>
+          <tr><td>Market interest rates have risen, which increases the discount rate used in value-in-use calculations and so reduces recoverable amount</td><td>Internal reporting shows the asset's economic performance is, or will be, worse than expected</td></tr>
+          <tr><td>The carrying amount of the entity's net assets exceeds its market capitalisation</td><td></td></tr>
+        </table>
+        <div class="callout c-def"><span class="ctag">Emerging indicator</span>
+          Climate-transition and regulatory risk is increasingly used in exam scenarios as an external indicator — e.g. new emissions legislation, or a shift in customer demand toward greener alternatives, that makes an asset's future cash flows genuinely less certain than before. It's tested the same way as any other indicator once identified.
+        </div>
+
+        <h3 class="sec">4. Measuring recoverable amount</h3>
+        <div class="callout c-formula"><span class="ctag">The core formula</span>Recoverable Amount = the HIGHER of Fair Value Less Costs of Disposal (FVLCD) and Value in Use (VIU)</div>
+        <p>The logic: an asset is worth to the business whichever is greater — what someone else would pay for it net of the cost of selling it (FVLCD), or what it's worth by continuing to use it (VIU). If <i>either</i> figure already exceeds carrying amount, there's no impairment and you don't need to calculate the other.</p>
+
+        <h4 class="subsec">Fair value less costs of disposal</h4>
+        <p>Fair value follows IFRS 13 (an orderly market transaction between willing parties), less the incremental costs directly attributable to disposal (legal costs, transaction taxes, costs of removing the asset) — but not termination benefits or costs of reorganising the business, which aren't disposal costs.</p>
+
+        <h4 class="subsec">Value in use — the construction rules</h4>
+        <p>VIU is the present value of the future cash flows expected to be derived from the asset. The standard is deliberately strict about how those cash flows are built, precisely because it would otherwise be trivially easy to justify almost any carrying amount with sufficiently optimistic assumptions.</p>
+        <ul>
+          <li>Base cash flow projections on reasonable and supportable assumptions, using the most recent budgets/forecasts approved by management.</li>
+          <li>The explicit forecast period is capped at a <b>maximum of 5 years</b>, unless a longer period can genuinely be justified.</li>
+          <li>Beyond the forecast period, extrapolate using a <b>steady or declining</b> growth rate — never an increasing rate, unless that can be justified — and the rate should not exceed the long-term average growth rate for the products, industries, or country in question.</li>
+          <li><b>Exclude</b> cash flows relating to financing activities and income tax — VIU is a pre-financing, pre-tax measure of the asset itself.</li>
+          <li><b>Exclude</b> cash flows expected from a future restructuring the entity isn't yet committed to, and from improving or enhancing the asset's performance beyond its current standard — you value the asset as it stands today, not as management hopes it might become.</li>
+          <li>The discount rate must be a <b>pre-tax</b> rate that reflects current market assessments of the time value of money and the risks specific to the asset (not risks already reflected in the cash flow estimates themselves, to avoid double-counting risk).</li>
+        </ul>
+
+        <h3 class="sec">5. Recognising the impairment loss</h3>
+        <p>If carrying amount exceeds recoverable amount, the impairment loss = carrying amount − recoverable amount.</p>
+        <ul>
+          <li>Asset carried under the <b>cost model</b> → loss recognised immediately in P&amp;L.</li>
+          <li>Asset carried under the <b>revaluation model</b> (IAS 16/38) → treated exactly like a revaluation decrease: first against that specific asset's own revaluation surplus (through OCI) to the extent one exists, with any remaining excess to P&amp;L.</li>
+        </ul>
+
+        <h3 class="sec">6. Cash Generating Units (CGUs)</h3>
+        <p>Many assets don't generate cash flows on their own — a single machine on a production line has no independent market value or cash-flow stream separate from the rest of the line. A CGU is the smallest identifiable group of assets that generates cash inflows that are largely independent of the cash inflows from other assets or groups of assets. You fall back to testing at the CGU level whenever an individual asset's own recoverable amount can't be estimated.</p>
+        <div class="callout c-def"><span class="ctag">Test order within a CGU</span>
+          If any single asset within a CGU <i>can</i> be individually valued (its own recoverable amount is determinable — e.g. it has an active resale market), test that asset on its own first, in isolation, before testing the CGU as a whole. Only assets that genuinely can't be tested individually get bundled into the CGU-level test.
+        </div>
+
+        <h3 class="sec">7. Goodwill and CGUs</h3>
+        <p>Goodwill doesn't generate cash flows independently either, so it's allocated to whichever CGU(s) are expected to benefit from the synergies of the business combination that created it, from the acquisition date. Goodwill is tested for impairment at least annually, and whenever an indicator exists.</p>
+        <div class="callout c-trap"><span class="ctag">Never forget</span>
+          A goodwill impairment loss is <b>never reversed</b> — no exceptions, however much the business subsequently improves. This is deliberate: goodwill isn't a specific identifiable asset that can genuinely "recover" its value; any apparent recovery is treated as internally generated goodwill, which IAS 38 doesn't allow onto the balance sheet.
+        </div>
+
+        <h3 class="sec">8. Corporate (shared) assets</h3>
+        <p>Some assets exist to support the business as a whole rather than any single CGU — a head office building, a central R&amp;D facility, group-wide IT infrastructure, a shared marketing function. These generate no independent cash inflows of their own and can't be allocated to just one CGU.</p>
+        <div class="callout c-def"><span class="ctag">How to handle them</span>
+          Allocate corporate assets across the relevant CGUs on a reasonable and consistent basis — most commonly pro-rata by carrying amount — <i>before</i> testing each CGU for impairment. If a reasonable allocation to individual CGUs isn't possible, test at the level of the smallest group of CGUs to which the corporate asset <i>can</i> reasonably be allocated.
+        </div>
+
+        <h3 class="sec">9. Allocating a CGU's impairment loss — the key exam mechanic</h3>
+        <p>Once a CGU's recoverable amount is below its carrying amount, the resulting loss has to be shared out across everything inside it — and this is where the majority of marks (and the majority of mistakes) sit in exam questions.</p>
+        <div class="callout c-def"><span class="ctag">The allocation sequence</span>
+          <b>Step 1</b> — reduce any goodwill allocated to the CGU first, fully if the loss is large enough.<br>
+          <b>Step 2</b> — allocate any loss remaining after goodwill to the CGU's other assets, <b>pro-rata based on their carrying amounts</b>.<br>
+          <b>Step 3 — the floor:</b> no individual asset within the CGU can be written down below the <b>higher of</b>: (a) its own fair value less costs of disposal, if determinable; (b) its own value in use, if determinable; and (c) zero.<br>
+          <b>Step 4 — reallocate the excess:</b> if an asset would otherwise be pushed below its floor, cap it there instead, and reallocate whatever loss couldn't be absorbed by it pro-rata among the <i>remaining</i>, non-floored assets. Repeat this process until the full loss is allocated, or every asset in the CGU is sitting at its individual floor.<br>
+          Current assets and any liabilities separately recognised within the CGU are normally excluded from this allocation entirely, since they're already carried at up-to-date values.
+        </div>
+        <div class="callout c-why"><span class="ctag">Why the floor rule exists</span>
+          Without it, a mechanical pro-rata allocation could write an asset down below what it's actually still worth on its own — which would itself misstate the financial statements in the opposite direction. The floor rule ensures the CGU-level loss is absorbed as far as possible by the assets that are genuinely the least recoverable, rather than spread blindly by size.
+        </div>
+        <div class="callout c-example"><span class="ctag">Worked example — full mechanic</span>
+          A CGU has a total carrying amount of $500,000, made up of: Goodwill $50,000, Asset A $200,000, Asset B $150,000, Asset C $100,000. The CGU's recoverable amount has been assessed at $380,000. Asset B's own individual recoverable amount is known separately to be $140,000.
+          <div class="worked">Total impairment loss = 500,000 - 380,000 = 120,000
+
+STEP 1 - Goodwill absorbs the loss first
+  Goodwill: 50,000 -> written down to nil
+  Remaining loss to allocate = 120,000 - 50,000 = 70,000
+
+STEP 2 - Pro-rata across A, B, C by carrying amount (350,000 total)
+  A: 70,000 x (200,000/350,000) = 40,000  -> tentative CA 160,000
+  B: 70,000 x (150,000/350,000) = 30,000  -> tentative CA 120,000
+  C: 70,000 x (100,000/350,000) = 20,000  -> tentative CA  80,000
+
+STEP 3 - Check each against its floor
+  B's own recoverable amount is 140,000, but the pro-rata
+  step would take it to 120,000 - below its floor.
+  Cap B at 140,000 instead.
+  Loss actually allocated to B = 150,000 - 140,000 = 10,000
+  Excess not allocated to B = 30,000 (tentative) - 10,000 (actual) = 20,000
+
+STEP 4 - Reallocate the 20,000 excess across A and C only,
+  pro-rata on their own carrying amounts (200,000 : 100,000)
+  A: 20,000 x (200,000/300,000) = 13,333 -> final CA 146,667
+  C: 20,000 x (100,000/300,000) =  6,667 -> final CA  73,333
+
+FINAL CARRYING AMOUNTS:
+  Goodwill: 0 | Asset A: 146,667 | Asset B: 140,000 (its floor) | Asset C: 73,333</div>
+        </div>
+
+        <h3 class="sec">10. Reversal of impairment losses</h3>
+        <ul>
+          <li>Assess at each reporting date whether indicators suggest a previously recognised loss has decreased, or no longer exists.</li>
+          <li>Reverse only to the extent that the <i>estimates</i> used to determine recoverable amount have genuinely changed since the last impairment was recognised — not simply because time has passed and a discounted figure has grown closer to its undiscounted value.</li>
+          <li>The reversal is capped at the carrying amount (net of what depreciation/amortisation would have been charged) that <i>would have existed had no impairment ever been recognised</i> — you can restore lost value, but never mark the asset up beyond where it would naturally be.</li>
+          <li>Recognised in P&amp;L, unless the asset is carried under the revaluation model, in which case it's treated as a revaluation increase (through OCI).</li>
+          <li>For a CGU, a reversal is allocated pro-rata to the assets other than goodwill, subject to the same individual-asset cap described above.</li>
+        </ul>
+
+        <h3 class="sec">11. An easy point to miss</h3>
+        <div class="callout c-def"><span class="ctag">Estimate changes without an impairment</span>
+          Even where testing concludes there's <i>no</i> impairment loss to recognise, the same indicator that prompted the test can still justify revising the asset's remaining useful life, depreciation method, or residual value going forward — a prospective IAS 8 change, entirely separate from the impairment conclusion itself. Examiners sometimes test whether candidates remember this even after correctly concluding "no impairment."
+        </div>
+
+        <h3 class="sec">12. Disclosure</h3>
+        <p>For each class of assets, disclose the impairment losses and reversals recognised in P&amp;L and in OCI during the period, and which line item they're included within. For any individual impairment loss or reversal that is material, disclose: the amount; the events and circumstances that led to it; whether it relates to an individual asset or a CGU (and, if a CGU, a description of how it's composed); the recoverable amount, and whether that figure is FVLCD or VIU; and — if VIU — the discount rate(s) used (or, if FVLCD, the basis used to measure it).</p>
+      </div>
+
+      <!-- ================= IAS 38 ================= -->
+      <div class="chapter" id="ias38">
+        <h2 class="ctitle">IAS 38 — Intangible Assets</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 2</div>
+
+        <h3 class="sec">1. Definition and the identifiability test</h3>
+        <p>An intangible asset is an identifiable, non-monetary asset without physical substance. The word doing the real work here is <b>identifiable</b> — it's what separates a recognisable intangible asset from internally generated goodwill, which IAS 38 explicitly forbids from ever being recognised.</p>
+        <div class="callout c-def"><span class="ctag">Identifiability test — meet EITHER condition</span>
+          (a) It is <b>separable</b> — capable of being separated from the entity and sold, transferred, licensed, rented, or exchanged, either individually or together with a related contract/asset — <b>or</b><br>
+          (b) It arises from <b>contractual or other legal rights</b>, regardless of whether those rights are themselves transferable or separable from the entity.
+        </div>
+        <p>Alongside identifiability, the same two-part recognition test from IAS 16 still applies: probable future economic benefits will flow to the entity, and cost can be measured reliably.</p>
+
+        <h3 class="sec">2. Modes of acquisition — this is where most marks live</h3>
+        <h4 class="subsec">Separately acquired</h4>
+        <p>Cost = purchase price plus directly attributable costs of preparing the asset for its intended use (e.g. professional fees, testing). Same principle as PPE.</p>
+
+        <h4 class="subsec">Acquired as part of a business combination</h4>
+        <p>Recognised separately from goodwill at its acquisition-date fair value — even if the acquiree had never recognised it on its own balance sheet (e.g. an internally-developed customer list or brand that the acquiree couldn't capitalise itself, because it was internally generated for them, can still be recognised by the acquirer, because for the acquirer it was, in effect, purchased).</p>
+
+        <h4 class="subsec">Internally generated — the research/development split</h4>
+        <div class="callout c-trap"><span class="ctag">The core rule</span>
+          <b>Research phase</b> — always expensed. At this stage the entity cannot yet demonstrate that an intangible asset exists that will generate probable future economic benefits, so there's nothing reliable to capitalise.<br><br>
+          <b>Development phase</b> — capitalise, but <i>only</i> from the point all six criteria below are met, and never retrospectively for costs incurred before that point.
+        </div>
+        <div class="callout c-def"><span class="ctag">The six development-phase criteria (mnemonic: PIRATE)</span>
+          <ul>
+            <li><b>P</b>robable future economic benefits — technical feasibility plus, e.g., existence of a market (or, for internal use, its usefulness to the entity)</li>
+            <li><b>I</b>ntention to complete the asset and use or sell it</li>
+            <li><b>R</b>esources (technical, financial, and other) adequate and available to complete development and to use or sell the asset</li>
+            <li><b>A</b>bility to use or sell the intangible asset</li>
+            <li><b>T</b>echnical feasibility of completing the asset so that it will be available for use or sale</li>
+            <li><b>E</b>xpenditure attributable to the asset during development can be measured reliably</li>
+          </ul>
+          All six must be met — miss one and the expenditure stays in P&amp;L.
+        </div>
+        <div class="callout c-trap"><span class="ctag">Two traps examiners love</span>
+          1) If a question gives you a specific date on which the criteria were first met, you don't re-derive it — apply the criteria <i>from that date forward only</i>. Costs incurred before that date remain expensed, even if the project later succeeds.<br>
+          2) You can <b>never go back and capitalise</b> costs already expensed in a prior period, even once all six criteria are later satisfied — and if research/development costs were expensed and the project is later abandoned or fails, there's no separate "write-off" needed because nothing was capitalised in the first place.
+        </div>
+        <div class="callout c-trap"><span class="ctag">Never recognised as intangible assets</span>
+          Internally generated goodwill, brands, mastheads, publishing titles, and customer lists are <b>never</b> recognised — even if the entity is confident they have value — because the cost of generating them internally can't be reliably distinguished from the cost of developing the business as a whole.
+        </div>
+
+        <h3 class="sec">3. Subsequent measurement</h3>
+        <p>Same cost model / revaluation model choice as IAS 16, made per class — but the revaluation model is only available if an <b>active market</b> exists for that specific type of intangible asset, which in practice is rare (it exists for things like certain transferable taxi licences or fishing quotas, but essentially never for patents, brands, or software, since each is unique). Where used, the same OCI/P&amp;L gain-and-loss mechanics as IAS 16 apply.</p>
+
+        <h3 class="sec">4. Amortisation</h3>
+        <ul>
+          <li><b>Finite useful life</b> — amortise systematically over the useful life, using a method that reflects the pattern of consumption of economic benefits (straight-line if that pattern can't be determined reliably).</li>
+          <li><b>Indefinite useful life</b> — <i>not</i> amortised. Instead, tested for impairment annually and whenever an indicator exists (same as goodwill). "Indefinite" doesn't mean "infinite" — it just means there's no foreseeable limit to the period over which the asset is expected to generate benefits, based on current analysis of all relevant factors.</li>
+          <li>Useful life, residual value, and amortisation method are reviewed at least annually — changes are prospective (IAS 8), exactly as for PPE.</li>
+        </ul>
+
+        <h3 class="sec">5. Derecognition</h3>
+        <p>Gain or loss = disposal proceeds − carrying amount, recognised in P&amp;L, never as revenue.</p>
+
+        <h3 class="sec">6. Website development costs</h3>
+        <p>A specific application of the research/development framework (from SIC-32), applied stage by stage:</p>
+        <table>
+          <tr><th>Stage</th><th>Treatment</th></tr>
+          <tr><td>Planning</td><td>Expense (equivalent to research)</td></tr>
+          <tr><td>Application &amp; infrastructure development</td><td>Capitalise if the six development criteria are met (equivalent to development)</td></tr>
+          <tr><td>Content development</td><td>Generally expense, unless the content is developed specifically to advertise/promote the entity's own products/services and the criteria are met</td></tr>
+          <tr><td>Operating stage (after launch)</td><td>Expense as incurred (maintenance), unless the expenditure enhances the site's performance beyond its original assessment — then capitalise the enhancement</td></tr>
+        </table>
+
+        <h3 class="sec">7. Disclosure</h3>
+        <p>For each class: useful life or amortisation rate, amortisation method used, gross carrying amount and accumulated amortisation, the line item(s) amortisation is included within, and a reconciliation of movements during the period. Additionally: for indefinite-life intangibles, the carrying amount and the reasons supporting an indefinite-life assessment; and the total amount of research and development expenditure recognised as an expense during the period.</p>
+      </div>
+
+      <!-- ================= IAS 40 ================= -->
+      <div class="chapter" id="ias40">
+        <h2 class="ctitle">IAS 40 — Investment Property</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 2</div>
+
+        <h3 class="sec">1. Definition and classification</h3>
+        <p>Investment property is land or a building (or part of one) held to earn rentals, for capital appreciation, or both — rather than for use in production/supply of goods or services or for admin purposes (that's PPE, IAS 16), or for sale in the ordinary course of business (that's inventory, IAS 2). The distinction matters because the whole point of IAS 40 is to let genuinely passive, investment-style property be measured at fair value with movements through P&amp;L — a much simpler regime than IAS 16's depreciation-based model, which wouldn't reflect the economics of a property held purely for its market value.</p>
+
+        <h3 class="sec">2. Classification examples and edge cases</h3>
+        <ul>
+          <li>Property leased to a third party under an operating lease → investment property, from the lessor's perspective.</li>
+          <li>Owner-occupied property → PPE, not investment property.</li>
+          <li>Property held for sale in the ordinary course of business → inventory.</li>
+          <li>Property under construction/development for future use as investment property → still classified as investment property (under construction), not PPE.</li>
+        </ul>
+        <div class="callout c-trap"><span class="ctag">The classic group-accounting trap</span>
+          A property owned by a subsidiary and leased to a <i>fellow group company</i> at market rent: in the subsidiary's own individual financial statements, it's investment property (from that single entity's perspective, it earns external rental income). But in the <b>consolidated</b> financial statements, it's reclassified as owner-occupied PPE — because from the group's perspective as a single reporting entity, the property is being used internally, not truly rented to an outside party. This single-line trap appears repeatedly in Section C consolidation questions.
+        </div>
+        <div class="callout c-def"><span class="ctag">Mixed use and ancillary services</span>
+          If part of a property is rented out and part is owner-occupied, and the portions can be sold or leased out separately, account for each portion separately (investment property vs PPE). If they can't be separated, treat the whole property as investment property only if the owner-occupied portion is insignificant.<br><br>
+          Ancillary services provided to occupants matter too: if services (e.g. security, general maintenance) are insignificant to the arrangement as a whole, the property is still investment property. But if the entity provides <i>significant</i> additional services — enough that the arrangement looks more like running an operating business than passively holding property (e.g. a hotel where the owner provides substantial guest services) — treat it as owner-occupied PPE instead.
+        </div>
+
+        <h3 class="sec">3. Initial measurement</h3>
+        <p>At cost — same components as PPE (purchase price plus directly attributable transaction costs, e.g. legal fees).</p>
+
+        <h3 class="sec">4. Subsequent measurement — a policy choice per ENTITY</h3>
+        <div class="callout c-trap"><span class="ctag">Key difference from IAS 16</span>
+          Unlike PPE, where the cost/revaluation choice is made per <i>class</i> of asset, the investment property measurement model is chosen once, for the <b>entire entity</b>, and applied to all of its investment property.
+        </div>
+        <ul>
+          <li><b>Fair value model:</b> remeasure to fair value at each reporting date. Gains and losses go <b>directly to P&amp;L</b> — not OCI. No depreciation is charged, since the asset is carried at a current fair value every period regardless.</li>
+          <li><b>Cost model:</b> cost − accumulated depreciation − accumulated impairment, exactly like IAS 16's cost model — but the fair value must still be disclosed in the notes, even though it isn't used for measurement.</li>
+        </ul>
+        <div class="callout c-why"><span class="ctag">Why fair value gains bypass OCI here, unlike IAS 16</span>
+          Under the IAS 16 revaluation model, the asset is still being <i>used</i> in the business, so an unrealised gain is treated cautiously (OCI) to avoid it looking like trading profit. Investment property, by contrast, is held purely as a financial-style investment for its market value — its whole purpose is capital appreciation and/or rental yield, so a fair value movement <i>is</i> the performance the entity is trying to generate, and IAS 40 reflects that directly in profit or loss.
+        </div>
+
+        <h3 class="sec">5. Transfers to and from investment property</h3>
+        <p>A transfer is only made when there's a genuine <b>change in use</b>, evidenced by one of the following:</p>
+        <table>
+          <tr><th>Transfer</th><th>Trigger</th></tr>
+          <tr><td>Investment property → PPE</td><td>Owner-occupation commences</td></tr>
+          <tr><td>Investment property → Inventory</td><td>Development with a view to sale commences</td></tr>
+          <tr><td>PPE → Investment property</td><td>Owner-occupation ceases (e.g. property vacated and then leased to a third party)</td></tr>
+          <tr><td>Inventory → Investment property</td><td>An operating lease to a third party commences</td></tr>
+        </table>
+        <div class="callout c-def"><span class="ctag">Accounting on transfer</span>
+          Transferring <i>out</i> of investment property under the fair value model: the fair value at the date of change of use becomes the deemed cost for subsequent accounting under the new classification (PPE or inventory).<br><br>
+          Transferring <i>into</i> investment property from owner-occupied PPE (cost model): treat it exactly like an IAS 16 revaluation at the date of transfer — restate to fair value, with any increase to OCI (unless reversing a previous P&amp;L loss on that asset) and any decrease to P&amp;L (unless reversing a previous surplus) — and then continue measuring under the fair value model afterward, with all future movements through P&amp;L as normal for investment property.
+        </div>
+
+        <h3 class="sec">6. Derecognition</h3>
+        <p>Derecognise on disposal, or on permanent withdrawal from use when no future economic benefits are expected. Gain or loss = proceeds − carrying amount, recognised in P&amp;L.</p>
+
+        <h3 class="sec">7. Disclosure</h3>
+        <p>Which model is used; if the fair value model — the methods and significant assumptions used in determining fair value, the extent to which fair value is based on a valuation by an independent, qualified valuer, and a reconciliation of movements (additions, disposals, fair value gains/losses, transfers to/from other classifications); if the cost model — depreciation method, useful lives, gross carrying amount and accumulated depreciation, <b>and</b> the fair value of the property (still required, unless fair value genuinely cannot be reliably determined, which must be explained and is rare in practice).</p>
+      </div>
+
+      <!-- ================= IFRS 5 ================= -->
+      <div class="chapter" id="ifrs5">
+        <h2 class="ctitle">IFRS 5 — Non-current Assets Held for Sale &amp; Discontinued Operations</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 3</div>
+
+        <h3 class="sec">1. Objective</h3>
+        <p>Two separate jobs in one standard: (1) make sure assets an entity is about to sell are measured and presented in a way that reflects that they're on their way out the door, rather than continuing to be depreciated as if business-as-usual; and (2) make sure that when a whole line of business is being exited, users can see the continuing business's performance separately from the part being discontinued.</p>
+
+        <h3 class="sec">2. Classification as "held for sale" — all conditions required</h3>
+        <div class="callout c-def"><span class="ctag">Both must be true at the reporting date</span>
+          (a) The asset (or disposal group) must be <b>available for immediate sale</b> in its present condition, subject only to terms that are usual and customary for sales of such assets.<br>
+          (b) The sale must be <b>highly probable</b> — which itself requires all of the following:
+          <ul>
+            <li>Management, at the appropriate level, is committed to a plan to sell</li>
+            <li>An active programme to locate a buyer and complete the plan has been initiated</li>
+            <li>The asset is being actively marketed for sale at a price that is reasonable in relation to its current fair value</li>
+            <li>The sale is expected to complete within <b>one year</b> from the date of classification (limited exceptions apply where delay is caused by events or circumstances beyond the entity's control, provided the entity remains committed to the plan)</li>
+            <li>Actions required to complete the plan indicate it's unlikely that significant changes will be made, or that the plan will be withdrawn</li>
+          </ul>
+        </div>
+        <div class="callout c-trap"><span class="ctag">Classic exam trap</span>
+          Scenarios often describe a sale that meets every condition <i>except</i> one — commonly, that shareholder or regulatory approval is still outstanding at the year end. If <b>any</b> condition isn't met, held-for-sale classification isn't available, however advanced the sale process otherwise looks — the asset stays in its normal classification and continues to be depreciated as usual.
+        </div>
+
+        <h3 class="sec">3. Measurement</h3>
+        <p>Measured at the <b>lower of carrying amount and fair value less costs to sell</b>, from the date of classification.</p>
+        <ul>
+          <li>Immediately before classification, first remeasure the asset under whatever standard normally applies to it (e.g. revalue PPE under IAS 16 if that's the relevant policy) — so you're comparing a properly up-to-date carrying amount against fair value less costs to sell.</li>
+          <li>Any write-down to fair value less costs to sell is an <b>impairment loss</b>, recognised in P&amp;L.</li>
+          <li>A subsequent increase in fair value less costs to sell can be recognised as a <b>gain</b> — but only up to the cumulative impairment losses already recognised (whether under IFRS 5 or previously under IAS 36). You can reverse a write-down, but never write the asset up above where it would otherwise have stood.</li>
+        </ul>
+        <div class="callout c-trap"><span class="ctag">Depreciation stops immediately</span>
+          Non-current assets classified as held for sale are <b>not depreciated or amortised</b> from the date of classification — even if the asset is technically still being used while a buyer is found. This is one of the most commonly tested single facts in this area.
+        </div>
+
+        <h3 class="sec">4. Presentation in the financial statements</h3>
+        <ul>
+          <li>Present separately from other assets, as a single line item — "non-current assets held for sale" (or "disposal group held for sale") — within <b>current assets</b>. It's reclassified for presentation purposes even though the asset itself remains non-current in nature; it is <i>not</i> relabelled as inventory.</li>
+          <li>A "disposal group" — a group of assets to be disposed of together in a single transaction, along with directly associated liabilities (e.g. an entire subsidiary or division being sold) — has its associated liabilities presented separately too, as "liabilities directly associated with a disposal group held for sale."</li>
+          <li>Assets and liabilities of a disposal group are <b>not offset</b> against each other and presented as a single net amount.</li>
+        </ul>
+
+        <h3 class="sec">5. Discontinued operations</h3>
+        <div class="callout c-def"><span class="ctag">Meaning</span>
+          A component of an entity that has either been disposed of, or is classified as held for sale, <b>and</b> represents a separate major line of business or geographical area of operations, or is part of a single coordinated plan to dispose of one, or is a subsidiary acquired exclusively with a view to resale.
+        </div>
+        <p>Presentation: a <b>single amount</b> is shown on the face of the statement of profit or loss for "profit or loss from discontinued operations," made up of the post-tax profit or loss of the discontinued operation for the period, plus the post-tax gain or loss recognised on the remeasurement to fair value less costs to sell (or on the actual disposal). A breakdown of that single figure (revenue, expenses, tax) is then required either on the face of the statement or in the notes.</p>
+        <div class="callout c-trap"><span class="ctag">SOPL is restated, SOFP is not</span>
+          The <b>comparative statement of profit or loss</b> is restated to present the prior year's results of the now-discontinued operation as discontinued too, for comparability. But the <b>statement of financial position is not restated retrospectively</b> — assets and liabilities are only reclassified as held for sale in the <i>current</i> period's SOFP. This asymmetry between the two statements is a frequently tested point.
+        </div>
+
+        <h3 class="sec">6. If an asset no longer qualifies as held for sale</h3>
+        <p>Reclassify it back to its original classification, measured at the <b>lower of</b>: (a) its carrying amount before it was classified as held for sale, adjusted for any depreciation, amortisation, or revaluations that would have been recognised had it never been classified as held for sale, and (b) its recoverable amount at the date of the decision not to sell.</p>
+      </div>
+
+      <!-- ================= IAS 23 ================= -->
+      <div class="chapter" id="ias23">
+        <h2 class="ctitle">IAS 23 — Borrowing Costs</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 3</div>
+
+        <h3 class="sec">1. Core principle</h3>
+        <div class="callout c-def"><span class="ctag">The rule in one line</span>
+          Borrowing costs directly attributable to the acquisition, construction, or production of a <b>qualifying asset</b> are capitalised as part of that asset's cost. All other borrowing costs are expensed as incurred.
+        </div>
+
+        <h3 class="sec">2. What is a qualifying asset</h3>
+        <p>An asset that necessarily takes a <b>substantial period of time</b> to get ready for its intended use or sale — e.g. self-constructed items of PPE, investment property under construction, or inventories such as maturing wine or whisky that genuinely require a long production process. It excludes financial assets, assets that are ready for use or sale when acquired, and assets that are produced routinely or repetitively in large quantities over a short period.</p>
+
+        <h3 class="sec">3. What counts as a borrowing cost</h3>
+        <p>Interest calculated using the effective interest method, finance charges on lease liabilities, and exchange differences on foreign currency borrowings to the extent they're regarded as an adjustment to interest costs.</p>
+
+        <h3 class="sec">4. How much to capitalise</h3>
+        <div class="callout c-formula"><span class="ctag">Specific borrowings</span>
+          Where funds are borrowed specifically to finance the qualifying asset: capitalise the actual borrowing costs incurred on that loan during the period, <b>less</b> any investment income earned on the temporary investment of those borrowed funds before they're actually spent on the asset.
+        </div>
+        <div class="callout c-formula"><span class="ctag">General borrowings</span>
+          Where the asset is funded from a general pool of borrowings rather than a specific loan: apply a <b>capitalisation rate</b> — the weighted average of the borrowing costs applicable to the entity's general borrowings outstanding during the period (excluding any specific borrowings) — to the expenditure incurred on the qualifying asset. The amount capitalised must not exceed the total borrowing costs actually incurred during the period.
+        </div>
+        <div class="callout c-example"><span class="ctag">Worked example — both types combined</span>
+          A company starts construction of a qualifying asset on 1 April, spending $2,000,000 on that date and a further $1,000,000 on 1 October (accounting year end 31 December, so a 9-month construction period this year). $1,500,000 of the initial spend was funded by a specific 6% loan taken out on 1 April; surplus funds from that loan were temporarily invested at 3% until needed. The remaining expenditure was funded from general borrowings, which consisted of a 8% loan of $2,000,000 and a 10% loan of $3,000,000, both outstanding throughout the year.
+          <div class="worked">SPECIFIC BORROWING (9 months, 1 Apr - 31 Dec):
+  Interest incurred: 1,500,000 x 6% x 9/12       = 67,500
+  Less: temporary investment income
+    (surplus 1,500,000 - portion actually spent
+     immediately; assume avg 500,000 idle for 3
+     months before fully drawn down) 500,000 x 3% x 3/12 = (3,750)
+  Capitalised on specific borrowing              = 63,750
+
+GENERAL POOL capitalisation rate:
+  (2,000,000 x 8%) + (3,000,000 x 10%)
+  ---------------------------------------- 
+        2,000,000 + 3,000,000
+  = (160,000 + 300,000) / 5,000,000 = 9.2%
+
+  Expenditure funded from general pool = 2,000,000 - 1,500,000
+    = 500,000 (part of 1 Apr spend) + 1,000,000 (1 Oct spend)
+
+  500,000 x 9.2% x 9/12   = 34,500
+  1,000,000 x 9.2% x 3/12 = 23,000
+  Capitalised on general pool             = 57,500
+
+TOTAL BORROWING COSTS CAPITALISED = 63,750 + 57,500 = 121,250
+(Check this does not exceed total borrowing costs incurred
+ in the period across all loans - it must not.)</div>
+        </div>
+
+        <h3 class="sec">5. Period of capitalisation</h3>
+        <ul>
+          <li><b>Commence</b> capitalisation when <i>all three</i> are true: expenditure on the asset is being incurred, borrowing costs are being incurred, and activities necessary to prepare the asset for its intended use or sale are in progress.</li>
+          <li><b>Suspend</b> capitalisation during extended periods in which active development is interrupted — but <i>not</i> for temporary delays that are a necessary part of the process (e.g. time needed for concrete to cure, or short administrative/technical delays that are normal for that type of project).</li>
+          <li><b>Cease</b> capitalisation when substantially all the activities necessary to prepare the asset for its intended use or sale are complete — even if minor administrative work remains, or minor finishing work (e.g. decorating to a specific occupant's requirements) is still outstanding.</li>
+          <li>Where an asset is completed in parts that are each capable of being used independently while construction continues on other parts (e.g. a business park of several separate buildings), capitalisation ceases for each part as soon as that part is substantially complete — it doesn't wait for the whole project to finish.</li>
+        </ul>
+
+        <h3 class="sec">6. Disclosure</h3>
+        <p>The amount of borrowing costs capitalised during the period, and the capitalisation rate used to determine the amount eligible for capitalisation from general borrowings.</p>
+      </div>
+
+      <!-- ================= IAS 2 ================= -->
+      <div class="chapter" id="ias2">
+        <h2 class="ctitle">IAS 2 — Inventories</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 4</div>
+
+        <h3 class="sec">1. Objective and the core rule</h3>
+        <p>Inventory sits at the heart of the trading cycle, so getting its measurement right directly drives gross profit. IAS 2 exists to standardise two things: how "cost" is built up, and when inventory should be written down below cost.</p>
+        <div class="callout c-formula"><span class="ctag">The core rule</span>Inventories are measured at the LOWER of Cost and Net Realisable Value (NRV)</div>
+        <p>Inventory = assets held for sale in the ordinary course of business, assets in the process of production for such sale, or materials/supplies to be consumed in the production process or in rendering services.</p>
+
+        <h3 class="sec">2. Building up "cost"</h3>
+        <p>Cost = costs of purchase + costs of conversion + other costs incurred in bringing the inventory to its present location and condition.</p>
+        <table>
+          <tr><th>Cost component</th><th>Includes</th></tr>
+          <tr><td>Costs of purchase</td><td>Purchase price + import duties/non-refundable taxes + directly attributable transport &amp; handling costs, less trade discounts and rebates</td></tr>
+          <tr><td>Costs of conversion</td><td>Direct labour, plus a systematic allocation of fixed and variable production overheads incurred in converting materials into finished goods</td></tr>
+          <tr><td>Other costs</td><td>Only to the extent incurred in bringing inventories to their present location and condition (e.g. design costs for a specific customer)</td></tr>
+        </table>
+
+        <div class="callout c-trap"><span class="ctag">Fixed overhead allocation — the normal capacity rule</span>
+          Fixed production overheads are allocated to units of production based on the <b>normal</b> capacity of the production facilities — not actual output, if actual output is abnormally low. If a factory operates well below normal capacity in a period (e.g. due to a strike or unusual downtime), the unallocated fixed overhead is <b>expensed immediately</b> in P&amp;L, rather than spread over the smaller-than-usual number of units, which would otherwise inflate the cost per unit artificially. Variable production overheads, by contrast, are allocated based on <i>actual</i> use of the production facilities.
+        </div>
+
+        <div class="callout c-example"><span class="ctag">Worked example — normal capacity</span>
+          A factory has budgeted (normal) output of 10,000 units per month and fixed production overheads of $50,000/month (so $5/unit at normal capacity). In a month affected by a machine breakdown, only 8,000 units are actually produced.
+          <div class="worked">Fixed overhead absorbed into inventory:
+  8,000 units x $5/unit (normal capacity rate) = $40,000
+
+Unallocated fixed overhead:
+  $50,000 - $40,000 = $10,000 -> expensed immediately
+  in P&L, NOT carried forward in the cost of the 8,000
+  units produced.
+
+(If output had instead been 12,000 units - above normal
+ capacity - the rate would still be applied at $5/unit;
+ IAS 2 does not require overheads to be spread thinner
+ just because output is unusually high.)</div>
+        </div>
+
+        <h3 class="sec">3. Costs always excluded — expensed as incurred</h3>
+        <ul>
+          <li>Abnormal amounts of wasted material, labour, or other production costs</li>
+          <li>Storage costs, unless necessary in the production process before a further production stage (e.g. maturing cheese)</li>
+          <li>Administrative overheads that don't contribute to bringing inventories to their present location and condition</li>
+          <li>Selling costs</li>
+          <li>Interest/borrowing costs — unless the inventory meets the IAS 23 definition of a qualifying asset (i.e. it necessarily takes a substantial period to get ready for sale, such as maturing whisky), in which case IAS 23 capitalisation rules apply instead</li>
+        </ul>
+
+        <h3 class="sec">4. Cost formulas for interchangeable items</h3>
+        <div class="callout c-trap"><span class="ctag">LIFO is banned under IFRS</span>
+          For inventory items that are ordinarily interchangeable, cost is assigned using <b>FIFO</b> (first-in, first-out) or <b>weighted average cost</b>. <b>LIFO (last-in, first-out) is not permitted</b> under IFRS — a frequently tested prohibition, precisely because it's allowed under US GAAP and candidates sometimes assume it's a free choice.<br>
+          For items that are <i>not</i> ordinarily interchangeable — goods produced and segregated for a specific project, for example — <b>specific identification</b> of individual costs is required; it isn't optional in that scenario.
+        </div>
+
+        <h3 class="sec">5. Net Realisable Value (NRV)</h3>
+        <div class="callout c-formula"><span class="ctag">NRV formula</span>NRV = Estimated selling price in the ordinary course of business − Estimated costs of completion − Estimated costs necessary to make the sale</div>
+        <div class="callout c-def"><span class="ctag">Write-down mechanics</span>
+          Compare cost to NRV <b>item by item</b> (or by group of similar items) — never on the basis of total inventory value as a whole. This matters because it prevents an item sitting above cost from masking a genuine write-down needed on a different item elsewhere in the balance.<br><br>
+          Reassess NRV at each period end. If the circumstances that caused an earlier write-down no longer apply (e.g. the selling price has recovered), <b>reverse</b> the write-down — but only up to the original cost; you can never write inventory up above what it originally cost.
+        </div>
+
+        <h3 class="sec">6. Recognition as an expense</h3>
+        <p>When inventories are sold, their carrying amount is recognised as an expense (cost of sales) in the same period the related revenue is recognised — matching the two together. Write-downs to NRV, and any inventory losses, are recognised as an expense in the period the write-down or loss occurs.</p>
+
+        <h3 class="sec">7. Disclosure</h3>
+        <p>Accounting policies for measuring inventories, including the cost formula used; total carrying amount, broken down by classification appropriate to the entity (e.g. raw materials, WIP, finished goods); the amount recognised as an expense (cost of sales) during the period; the amount of any write-down expensed; the amount and circumstances of any reversal of a write-down; and the carrying amount of inventories pledged as security for liabilities.</p>
+      </div>
+
+      <!-- ================= IAS 41 ================= -->
+      <div class="chapter" id="ias41">
+        <h2 class="ctitle">IAS 41 — Agriculture</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 4</div>
+
+        <h3 class="sec">1. Scope and key definitions</h3>
+        <p>IAS 41 covers <b>biological assets</b> (living animals or plants), <b>agricultural produce at the point of harvest</b>, and government grants related to biological assets measured at fair value less costs to sell.</p>
+        <div class="callout c-def"><span class="ctag">Definitions</span>
+          <b>Agricultural activity</b> — the management of the biological transformation and harvest of biological assets, for sale or for conversion into agricultural produce or additional biological assets.<br>
+          <b>Biological transformation</b> — the processes of growth, degeneration, production, and procreation that cause qualitative or quantitative change in a biological asset.<br>
+          <b>Agricultural produce</b> — the harvested product of the entity's biological assets (e.g. milk, wool, picked fruit, felled timber).
+        </div>
+        <p><b>Out of scope:</b> land related to agricultural activity (IAS 16/IAS 40), intangible assets related to agricultural activity (IAS 38), and agricultural produce <i>after</i> the point of harvest — from that point, it becomes ordinary inventory under IAS 2.</p>
+
+        <h3 class="sec">2. Measurement — fair value is the default, not a choice</h3>
+        <div class="callout c-formula"><span class="ctag">The core rule</span>
+          Biological assets are measured at <b>fair value less costs to sell</b>, both on initial recognition and at every subsequent reporting date, with gains and losses recognised <b>in P&amp;L immediately</b> — there is no OCI option here, unlike the IAS 16/IAS 40 revaluation models.<br><br>
+          Agricultural produce is measured at fair value less costs to sell <b>at the point of harvest</b>. That harvest-date figure then becomes the deemed "cost" for the produce going forward, at which point it leaves IAS 41 and is accounted for as ordinary inventory under IAS 2.
+        </div>
+        <div class="callout c-why"><span class="ctag">Why fair value, and why straight to P&amp;L</span>
+          Unlike a factory or an office building, a herd of cattle or a field of wheat changes in value largely through biological processes outside the entity's direct control (growth, weather, disease), and there's usually a ready, observable market price. IAS 41 treats these value changes as part of ordinary operating performance for an agricultural business — the increase in a herd's value from growth <i>is</i> the business's output — so it flows straight through profit rather than being parked in equity as an unrealised holding gain.
+        </div>
+        <p>Only in the rare case where fair value cannot be measured reliably (and only on initial recognition) is a biological asset instead measured at cost less accumulated depreciation and impairment.</p>
+
+        <h3 class="sec">3. Bearer plants — the 2014 exception</h3>
+        <div class="callout c-trap"><span class="ctag">Bearer plants sit in IAS 16, not IAS 41</span>
+          A <b>bearer plant</b> — a living plant used solely to grow produce over several periods, which is not itself intended for sale as a living plant or harvested as agricultural produce (other than incidental scrap sales) — is accounted for under <b>IAS 16</b>, at cost less depreciation and impairment (or revaluation model), exactly like any other item of PPE. Grape vines, rubber trees, and oil palms are the standard textbook examples.<br><br>
+          But the <i>produce</i> still growing on that bearer plant — the grapes still on the vine — remains squarely within IAS 41, measured at fair value less costs to sell, right up until harvest.
+        </div>
+        <div class="callout c-example"><span class="ctag">Worked example — a vineyard, three standards at once</span>
+          <div class="worked">The vines themselves         -> IAS 16 (bearer plant, PPE)
+  - depreciated over useful life, cost or revaluation model
+
+Grapes still growing on the vine  -> IAS 41
+  - measured at FV less costs to sell, gains/losses to P&L
+
+Grapes once picked (harvested)    -> IAS 41 one more time
+  - measured at FV less costs to sell AT THE POINT OF HARVEST
+  - this FV becomes their deemed "cost" going forward
+
+Grapes/juice/wine in production/storage after harvest -> IAS 2
+  - ordinary inventory rules apply from here (lower of cost
+    and NRV), using the harvest-date FV as the opening cost</div>
+        </div>
+
+        <h3 class="sec">4. Government grants related to biological assets</h3>
+        <ul>
+          <li>Unconditional grant related to a biological asset measured at fair value less costs to sell → recognise in P&amp;L when the grant becomes receivable.</li>
+          <li>Conditional grant (including one that requires the entity <i>not</i> to engage in specified agricultural activity) → recognise in P&amp;L only once the conditions are met.</li>
+        </ul>
+
+        <h3 class="sec">5. Disclosure</h3>
+        <p>The aggregate gain or loss arising during the period on initial recognition of biological assets and agricultural produce, and from changes in fair value less costs to sell of biological assets; a description of each group of biological assets; and a reconciliation of changes in the carrying amount of biological assets between the start and end of the period (increases from purchases, decreases from harvest/sales, and net gains/losses from fair value changes).</p>
+      </div>
+
+      <!-- ================= IFRS 15 ================= -->
+      <div class="chapter" id="ifrs15">
+        <h2 class="ctitle">IFRS 15 — Revenue from Contracts with Customers</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 5</div>
+
+        <h3 class="sec">1. Core principle</h3>
+        <div class="callout c-def"><span class="ctag">The single objective</span>
+          Recognise revenue to depict the transfer of promised goods or services to customers in an amount that reflects the consideration the entity <b>expects to be entitled to</b> in exchange for those goods or services. Everything in the standard is really just working machinery built to apply that one sentence consistently.
+        </div>
+
+        <h3 class="sec">2. The five-step model</h3>
+        <table>
+          <tr><th>Step</th><th>What it does</th></tr>
+          <tr><td>1. Identify the contract</td><td>Confirms there's an agreement with real substance and collectability</td></tr>
+          <tr><td>2. Identify performance obligations</td><td>Breaks the contract into distinct promises</td></tr>
+          <tr><td>3. Determine the transaction price</td><td>Works out the total consideration expected</td></tr>
+          <tr><td>4. Allocate the transaction price</td><td>Splits that total across the performance obligations</td></tr>
+          <tr><td>5. Recognise revenue</td><td>As (or when) each performance obligation is satisfied</td></tr>
+        </table>
+
+        <h4 class="subsec">Step 1 — Identify the contract</h4>
+        <p>A contract exists for IFRS 15 purposes only when: it's approved by the parties, who are committed to their obligations; each party's rights regarding the goods/services can be identified; payment terms can be identified; the contract has commercial substance; and it's probable the entity will actually collect the consideration it's entitled to.</p>
+
+        <h4 class="subsec">Step 2 — Identify performance obligations</h4>
+        <div class="callout c-def"><span class="ctag">The "distinct" test — both conditions required</span>
+          A promised good or service is distinct (and therefore a separate performance obligation) only if <b>both</b>: (a) the customer can benefit from it either on its own or together with other readily available resources, <b>and</b> (b) the promise is separately identifiable from other promises in the contract — i.e. it isn't so interrelated with, or significantly modifying, another promised item that the two are really one combined output.
+        </div>
+
+        <h4 class="subsec">Step 3 — Determine the transaction price</h4>
+        <ul>
+          <li><b>Variable consideration</b> (discounts, rebates, refunds, credits, performance bonuses/penalties) — estimate using either the <i>expected value</i> (probability-weighted) method or the <i>most likely amount</i> method, whichever better predicts the amount the entity will be entitled to. Include the estimate only to the extent it is <b>highly probable</b> that a significant revenue reversal won't occur later when the uncertainty resolves — the "constraint" on variable consideration.</li>
+          <li><b>Significant financing component</b> — if the timing of payments gives either party a significant financing benefit, adjust the transaction price for the time value of money. A practical expedient means this isn't required if the gap between transfer of the goods/services and payment is expected to be one year or less.</li>
+          <li><b>Non-cash consideration</b> — measured at fair value.</li>
+          <li><b>Consideration payable to a customer</b> — reduces the transaction price, unless the payment is in exchange for a distinct good or service the customer actually provides in return.</li>
+        </ul>
+
+        <h4 class="subsec">Step 4 — Allocate the transaction price</h4>
+        <p>Allocated based on the <b>relative standalone selling prices</b> of each distinct good or service. If a standalone selling price isn't directly observable, it's estimated — using an adjusted market assessment, an expected-cost-plus-margin approach, or (in limited circumstances) a residual approach.</p>
+
+        <h4 class="subsec">Step 5 — Recognise revenue</h4>
+        <div class="callout c-def"><span class="ctag">Over time vs. point in time</span>
+          Recognise <b>over time</b> if any one of these is met: (a) the customer simultaneously receives and consumes the benefits as the entity performs; (b) the entity's performance creates or enhances an asset the customer controls as it's created; or (c) the asset created has no alternative use to the entity <i>and</i> the entity has an enforceable right to payment for performance completed to date.<br><br>
+          If none of those apply, recognise at a single <b>point in time</b> — when control transfers, judged using indicators such as: right to payment, legal title, physical possession, transfer of the risks and rewards of ownership, and customer acceptance.
+        </div>
+        <div class="callout c-why"><span class="ctag">Why "control" replaced "risks and rewards"</span>
+          The old revenue standard (IAS 18) focused on when risks and rewards transferred, which worked reasonably well for simple goods sales but gave little guidance for services or long-term contracts. IFRS 15's control-based model handles both: for a contractor building a custom asset on the customer's land, control clearly transfers as the work progresses (the "over time" criteria), even though physical possession and legal title might not change hands until completion.
+        </div>
+
+        <h3 class="sec">3. Special business models</h3>
+        <div class="callout c-def"><span class="ctag">Principal vs. agent</span>
+          A <b>principal</b> controls the good or service before it's transferred to the customer, and recognises revenue at the <b>gross</b> transaction amount. An <b>agent</b> arranges for another party to provide the good/service, and recognises revenue only at its <b>net</b> fee or commission. Indicators of being the principal: primary responsibility for fulfilling the promise, inventory risk before/after the customer order, and discretion in setting the price.
+        </div>
+        <div class="callout c-def"><span class="ctag">Warranties</span>
+          If a customer has the option to purchase a warranty separately, or the warranty provides a service beyond simply assuring the product complies with agreed specifications, it's a <b>separate performance obligation</b> — allocate part of the transaction price to it. A warranty that only assures the product works as intended (an "assurance-type" warranty) is instead accounted for as a provision under <b>IAS 37</b>, not as separate revenue.
+        </div>
+        <div class="callout c-def"><span class="ctag">Consignment arrangements</span>
+          Revenue is not recognised on delivery to a dealer or distributor if the entity retains control of the product — for example, if it can require the product's return, or the dealer has no unconditional obligation to pay until the product is actually sold to an end customer. Revenue is only recognised when the dealer sells to the end customer (or another triggering event transfers control).
+        </div>
+        <div class="callout c-def"><span class="ctag">Bill-and-hold arrangements</span>
+          Revenue can be recognised before physical delivery if control has genuinely transferred, which requires: a substantive reason for the bill-and-hold arrangement; the product being separately identified as belonging to the customer; the product being ready for physical transfer; and the entity being unable to use the product or direct it to a different customer.
+        </div>
+        <div class="callout c-trap"><span class="ctag">Sale with a right of return</span>
+          Recognise revenue only for the consideration the entity expects to be entitled to (i.e. excluding expected returns), recognise a <b>refund liability</b> for the amount expected to be refunded, and recognise a corresponding <b>asset</b> (with an adjustment to cost of sales) for the entity's right to recover the returned product from the customer when the refund liability is settled. Three separate figures, not one net adjustment.
+        </div>
+
+        <h3 class="sec">4. Contract costs</h3>
+        <ul>
+          <li><b>Incremental costs of obtaining a contract</b> (e.g. sales commissions) — capitalise if expected to be recovered, unless the resulting amortisation period would be one year or less, in which case a practical expedient allows immediate expensing instead.</li>
+          <li><b>Costs to fulfil a contract</b> — capitalise if they relate directly to an identifiable contract, generate or enhance resources that will be used to satisfy future performance obligations, and are expected to be recovered.</li>
+        </ul>
+        <div class="callout c-why"><span class="ctag">Percentage of completion, reframed</span>
+          Candidates trained on older syllabi sometimes look for a separate "percentage of completion method." Under IFRS 15, that concept still exists, but it's simply what "over time" recognition looks like in practice — revenue is recognised using an appropriate measure of progress toward completion (an output method like surveys of work performed, or an input method like costs incurred to date over total estimated costs), rather than being a distinct method sitting outside the five-step model.
+        </div>
+      </div>
+
+      <!-- ================= IAS 20 ================= -->
+      <div class="chapter" id="ias20">
+        <h2 class="ctitle">IAS 20 — Government Grants &amp; Government Assistance</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 5</div>
+
+        <h3 class="sec">1. Scope</h3>
+        <p>Covers accounting for government grants and disclosure of government assistance more broadly. Excludes government assistance that can't reasonably have a value placed on it (e.g. free technical or marketing advice), and government transactions that can't be distinguished from the entity's normal trading transactions.</p>
+        <div class="callout c-def"><span class="ctag">Definitions</span>
+          <b>Government</b> — government, government agencies, and similar bodies, whether local, national, or international.<br>
+          <b>Government grants</b> — assistance by government in the form of a transfer of resources, in return for past or future compliance with certain conditions relating to the entity's operating activities.
+        </div>
+
+        <h3 class="sec">2. Recognition condition</h3>
+        <div class="callout c-def"><span class="ctag">Reasonable assurance, both conditions</span>
+          A grant (including a non-monetary grant measured at fair value) is only recognised when there is <b>reasonable assurance</b> that: (a) the entity will comply with the conditions attached to it, and (b) the grant will actually be received.
+        </div>
+
+        <h3 class="sec">3. Two types of grants</h3>
+        <ul>
+          <li><b>Grants related to assets</b> — the primary condition is that a qualifying entity should purchase, construct, or otherwise acquire a long-term asset.</li>
+          <li><b>Grants related to income</b> — any grant that isn't related to an asset.</li>
+        </ul>
+
+        <h3 class="sec">4. Accounting treatment — matching, not a windfall</h3>
+        <p>The core idea across both types is matching: recognise the grant in P&amp;L on a systematic basis over the same periods in which the entity recognises, as expenses, the related costs the grant is intended to compensate.</p>
+
+        <div class="callout c-def"><span class="ctag">Grants related to assets — two acceptable presentations</span>
+          <b>(a) Deferred income approach:</b> set the grant up as deferred income on the balance sheet, and recognise it in P&amp;L on a systematic basis over the useful life of the related asset.<br><br>
+          <b>(b) Netting approach:</b> deduct the grant from the carrying amount of the asset. The grant then effectively flows into P&amp;L via a lower depreciation charge over the asset's life.
+        </div>
+        <div class="callout c-example"><span class="ctag">Worked example — both methods give the same P&amp;L impact</span>
+          Asset cost $500,000, useful life 5 years, straight-line depreciation. A $100,000 grant is received toward the asset.
+          <div class="worked">DEFERRED INCOME METHOD:
+  SOFP: Asset at gross cost         500,000
+        Deferred income (grant)     100,000 (80,000 non-current
+                                              + 20,000 current, split
+                                              by expected recognition)
+  P&L each year:
+    Depreciation expense  (500,000/5)   = (100,000)
+    Grant income released (100,000/5)   =   20,000
+    Net P&L impact                      =  (80,000)
+
+NETTING METHOD:
+  SOFP: Asset at net cost (500,000-100,000) = 400,000
+  P&L each year:
+    Depreciation expense (400,000/5)    =  (80,000)
+    Net P&L impact                      =  (80,000)
+
+Same $80,000 net annual charge either way - the methods
+differ only in SOFP presentation (gross asset + separate
+deferred income liability, vs a single net asset figure),
+not in the profit or loss result.</div>
+        </div>
+        <div class="callout c-def"><span class="ctag">Grants related to income — two acceptable presentations</span>
+          Presented either (a) separately, often as "other income," or (b) deducted from the related expense it's compensating for. Unless a question specifies which method to use, either is technically acceptable — but apply whichever the question's facts point to consistently.
+        </div>
+
+        <h3 class="sec">5. Grants that don't relate to future costs</h3>
+        <p>A grant that becomes receivable as compensation for expenses or losses already incurred, or that provides immediate financial support with no future related costs, is recognised in P&amp;L in the period it becomes receivable — there's nothing to defer or match against.</p>
+
+        <h3 class="sec">6. Repayment of grants</h3>
+        <p>Treated as a change in accounting estimate (IAS 8), not a prior period error:</p>
+        <ul>
+          <li><b>Grant related to income:</b> apply the repayment first against any unamortised deferred credit remaining for that grant; any excess is expensed immediately.</li>
+          <li><b>Grant related to an asset:</b> increase the carrying amount of the asset (if the netting method was used) or reduce the deferred income balance (if the deferred income method was used) by the amount repaid. Any cumulative additional depreciation that would have been charged to date had the grant never been received is recognised immediately as an expense.</li>
+        </ul>
+
+        <h3 class="sec">7. Disclosure</h3>
+        <p>The accounting policy adopted, including the presentation method used; the nature and extent of grants recognised, and an indication of other forms of government assistance from which the entity has directly benefited; and any unfulfilled conditions or other contingencies attached to recognised government assistance.</p>
+      </div>
+
+      <!-- ================= IAS 12 ================= -->
+      <div class="chapter" id="ias12">
+        <h2 class="ctitle">IAS 12 — Income Taxes</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 6</div>
+
+        <h3 class="sec">1. Two separate things under one heading</h3>
+        <p>"Tax expense" in the financial statements is actually two very different numbers added together: <b>current tax</b> (what's actually owed to the tax authority for the period, based on tax rules) and <b>deferred tax</b> (an accounting adjustment that exists purely because accounting profit and taxable profit are calculated using different rules, and IAS 12 wants the tax charge in the accounts to reflect the accounting profit's tax consequences, not just the cash tax bill).</p>
+
+        <h3 class="sec">2. Current tax</h3>
+        <p>The amount of tax payable (or recoverable) on taxable profit for the period, calculated using tax rates and laws that have been enacted, or substantively enacted, by the reporting date. Recognised as an expense in P&amp;L — unless it relates to a transaction or event that was itself recognised outside P&amp;L (in OCI or directly in equity), in which case the related tax follows it to the same location.</p>
+        <div class="callout c-def"><span class="ctag">Under/over-provisions</span>
+          Where the actual tax assessment for a prior year turns out to differ from what was estimated and provided for, the difference is simply adjusted through the <b>current year's</b> tax expense — it's a normal estimation true-up, not a prior period error requiring IAS 8 restatement.
+        </div>
+
+        <h3 class="sec">3. Deferred tax — the core comparison</h3>
+        <p>Deferred tax exists because of <b>temporary differences</b> — differences between an asset or liability's carrying amount in the financial statements and its <b>tax base</b>.</p>
+        <div class="callout c-def"><span class="ctag">Tax base</span>
+          <b>Tax base of an asset</b> — the amount that will be deductible for tax purposes in future periods as the asset's economic benefits are recovered.<br>
+          <b>Tax base of a liability</b> — its carrying amount, less any amount that will be deductible for tax purposes in respect of that liability in future periods.
+        </div>
+        <div class="callout c-formula"><span class="ctag">Temporary difference = Carrying amount − Tax base</span>
+          <b>Taxable temporary difference</b> (CA &gt; tax base for an asset) → will result in taxable amounts in the future → gives rise to a <b>Deferred Tax Liability (DTL)</b>.<br><br>
+          <b>Deductible temporary difference</b> (CA &lt; tax base for an asset, or CA &gt; tax base for a liability) → will result in deductible amounts in the future → gives rise to a <b>Deferred Tax Asset (DTA)</b> — but only recognised to the extent it's <b>probable</b> that future taxable profit will be available against which the deductible temporary difference can actually be used.
+        </div>
+
+        <h3 class="sec">4. The examples that come up again and again</h3>
+        <table>
+          <tr><th>Situation</th><th>Effect</th></tr>
+          <tr><td>PPE where tax (capital) allowances have been claimed faster than accounting depreciation</td><td>Carrying amount &gt; tax base → taxable temporary difference → DTL</td></tr>
+          <tr><td>A provision recognised for accounting purposes (e.g. warranty) but only tax-deductible when actually paid</td><td>Tax base of the liability exceeds its carrying amount (since the full amount remains deductible later) → deductible temporary difference → DTA</td></tr>
+          <tr><td>Revaluation of PPE under IAS 16 (revaluation surplus)</td><td>Carrying amount rises above tax base, even though no tax is currently payable → taxable temporary difference → DTL, with the deferred tax charged to <b>OCI</b> (following the revaluation gain to the same location)</td></tr>
+          <tr><td>Unused tax losses carried forward</td><td>DTA, but only to the extent it's probable future taxable profits will be available to utilise them</td></tr>
+        </table>
+        <div class="callout c-example"><span class="ctag">Worked example — building the deferred tax computation</span>
+          At the year end: PPE carrying amount $800,000, tax base $650,000. A warranty provision of $40,000 has been recognised (fully deductible only when paid, so its tax base is nil). Tax rate 25%. Opening deferred tax liability brought forward was $30,000.
+          <div class="worked">                          Carrying    Tax      Temporary
+                          amount      base     difference
+PPE                       800,000    650,000    150,000  (taxable)
+Warranty provision         40,000          0    (40,000) (deductible,
+                                                            reduces
+                                                            net taxable
+                                                            difference)
+
+Net taxable temporary difference = 150,000 - 40,000 = 110,000
+Deferred tax liability required  = 110,000 x 25% = 27,500
+
+Movement through P&L:
+  Closing DTL required          27,500
+  Opening DTL b/f              (30,000)
+  Credit to P&L (deferred tax income) = 2,500
+
+(If the PPE temporary difference had instead arisen partly
+ from a revaluation, the portion of deferred tax relating to
+ the revaluation gain would be charged to OCI instead of P&L,
+ with only the remainder following the normal P&L route.)</div>
+        </div>
+
+        <h3 class="sec">5. Measurement rules — two traps in one place</h3>
+        <div class="callout c-trap"><span class="ctag">Two things candidates get wrong most often</span>
+          1) Deferred tax is measured using tax rates <b>enacted or substantively enacted</b> by the reporting date that are expected to apply when the temporary difference reverses — if a new tax rate has been announced but isn't yet substantively enacted, the old rate is still used.<br>
+          2) Deferred tax balances are <b>never discounted</b> to present value — even though the underlying temporary differences may not reverse for many years. This is a deliberate exception; most other long-term liabilities under IFRS (e.g. provisions with a material time value of money) generally are discounted, which is exactly why this gets tested.
+        </div>
+
+        <h3 class="sec">6. The initial recognition exemption</h3>
+        <p>Deferred tax is <i>not</i> recognised for temporary differences arising on the initial recognition of goodwill (grossing goodwill up for its own related deferred tax would create a circular calculation), nor for the initial recognition of an asset or liability in a transaction that is not a business combination and, at the time of the transaction, affects neither accounting profit nor taxable profit.</p>
+
+        <h3 class="sec">7. Presentation</h3>
+        <ul>
+          <li>Deferred tax assets and liabilities are always classified as <b>non-current</b> in the statement of financial position, regardless of when the underlying temporary differences are actually expected to reverse — unlike current tax, which is a current item.</li>
+          <li>Offsetting a DTA against a DTL is only permitted where the entity has a legally enforceable right to set off current tax assets against current tax liabilities, <b>and</b> the deferred tax balances relate to income taxes levied by the same taxation authority.</li>
+        </ul>
+
+        <h3 class="sec">8. Disclosure</h3>
+        <p>The major components of tax expense (current tax expense, adjustments recognised for prior periods, deferred tax expense/income relating to the origination and reversal of temporary differences, and any deferred tax impact of a change in tax rate); the aggregate current and deferred tax relating to items charged directly to OCI or equity; and an explanation of the relationship between tax expense and accounting profit — typically a numerical reconciliation of tax expense to accounting profit multiplied by the applicable tax rate.</p>
+      </div>
+
+      <!-- ================= IAS 21 ================= -->
+      <div class="chapter" id="ias21">
+        <h2 class="ctitle">IAS 21 — The Effects of Changes in Foreign Exchange Rates</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 6</div>
+
+        <h3 class="sec">1. Scope, at FR level</h3>
+        <p>IAS 21 technically covers two things: accounting for individual transactions denominated in a foreign currency, and translating the financial statements of a foreign operation into a group's presentation currency. At FR level, the focus is almost entirely on the first — individual foreign currency transactions within a single entity.</p>
+        <div class="callout c-def"><span class="ctag">Key definitions</span>
+          <b>Functional currency</b> — the currency of the primary economic environment in which the entity operates (usually the currency in which it primarily generates and spends cash).<br>
+          <b>Presentation currency</b> — the currency in which the financial statements are presented.<br>
+          <b>Foreign currency</b> — any currency other than the entity's own functional currency.
+        </div>
+        <p>Determining functional currency looks first at primary factors: the currency that mainly influences the entity's selling prices, the currency of the country whose competitive forces and regulations mainly determine those selling prices, and the currency that mainly influences labour, material, and other costs. Secondary factors (used if the primary factors are inconclusive) include the currency in which financing funds are generated, and the currency in which receipts from operating activities are usually retained.</p>
+
+        <h3 class="sec">2. Initial recognition</h3>
+        <p>A foreign currency transaction is translated into the functional currency at the <b>spot exchange rate</b> on the date of the transaction (a practical average rate for the period can be used as an approximation if exchange rates don't fluctuate significantly).</p>
+
+        <h3 class="sec">3. Subsequent measurement — it depends what kind of item it is</h3>
+        <div class="callout c-def"><span class="ctag">Monetary vs. non-monetary</span>
+          <b>Monetary items</b> — cash, and assets/liabilities to be received or paid in a fixed or determinable amount of currency (receivables, payables, loans) — are <b>retranslated at the closing rate</b> at every reporting date. The resulting exchange difference is recognised in <b>P&amp;L</b> for the period.<br><br>
+          <b>Non-monetary items measured at historical cost</b> (most PPE, inventory) — <i>not</i> retranslated at all; they remain at the exchange rate that applied on the date of the original transaction.<br><br>
+          <b>Non-monetary items measured at fair value</b> (e.g. a revalued property, or an investment at FVTPL/FVTOCI) — translated using the exchange rate on the date the fair value was determined. The resulting exchange difference is not separated out — it forms part of the overall fair value gain or loss, and follows that gain or loss to wherever it's normally recognised (P&amp;L or OCI, matching the item's usual treatment under its own standard).
+        </div>
+        <div class="callout c-example"><span class="ctag">Worked example — purchase, year end, settlement</span>
+          On 1 November, a company buys inventory on credit from a foreign supplier for FC 100,000, when the spot rate is $1 = FC 2.00. The company has a 31 December year end, when the rate is $1 = FC 2.10. The invoice is settled on 15 February the following year, when the rate is $1 = FC 1.95.
+          <div class="worked">1 Nov - Initial recognition (spot rate 2.00):
+  Dr Inventory / Payables         100,000/2.00 = $50,000
+
+31 Dec - Retranslate the MONETARY item (payable) at closing rate:
+  Payable at closing rate = 100,000/2.10 = $47,619
+  Payable has decreased in $ terms (FC has weakened vs $)
+  Dr Payables 2,381 / Cr P&L (exchange gain) 2,381
+  (Note: inventory itself is NOT retranslated - it stays at
+   its historical-rate cost of $50,000, since it's a
+   non-monetary item held at historical cost.)
+
+15 Feb - Settlement at spot rate 1.95:
+  Cash paid = 100,000/1.95 = $51,282
+  Payable on books (post year-end retranslation) = $47,619
+  Dr P&L (exchange loss) 3,663 / Cr Cash 3,663
+
+Net effect across both periods: a $2,381 gain in year 1,
+a $3,663 loss in year 2 - each recognised in the P&L of
+the period in which it arises, not retrospectively adjusted.</div>
+        </div>
+      </div>
+
+      <!-- ================= IFRS 16 ================= -->
+      <div class="chapter" id="ifrs16">
+        <h2 class="ctitle">IFRS 16 — Leases</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 8</div>
+
+        <h3 class="sec">1. Why this standard exists</h3>
+        <p>Under the old IAS 17, operating leases stayed entirely off the lessee's balance sheet — a company could lease its entire store network or aircraft fleet and show almost no related assets or liabilities at all, just a rental expense. IFRS 16 largely eliminated that distinction for lessees: with very limited exceptions, if you control the use of an identified asset for a period, it goes on your balance sheet.</p>
+
+        <h3 class="sec">2. Identifying a lease — three conditions, all required</h3>
+        <div class="callout c-def"><span class="ctag">A contract contains a lease only if ALL of these hold</span>
+          (a) There is an <b>identified asset</b> — specified explicitly or implicitly in the contract, and the supplier doesn't have a substantive right to substitute it for a different asset.<br>
+          (b) The customer has the right to obtain <b>substantially all of the economic benefits</b> from use of the asset throughout the period of use.<br>
+          (c) The customer has the right to <b>direct the use</b> of the asset — deciding how and for what purpose it's used throughout the period.
+        </div>
+
+        <h3 class="sec">3. Lessee accounting — a single model</h3>
+        <p>At commencement, the lessee recognises two things:</p>
+        <div class="callout c-formula"><span class="ctag">Initial recognition</span>
+          <b>Lease liability</b> = present value of the lease payments not yet paid, discounted using the interest rate implicit in the lease (if readily determinable), or otherwise the lessee's incremental borrowing rate.<br><br>
+          <b>Right-of-use (ROU) asset</b> = the initial lease liability + any lease payments made at or before commencement (less any lease incentives received) + initial direct costs + an estimate of the cost of dismantling, removing, or restoring the underlying asset or site, where applicable (the same present-value logic as an IAS 16 decommissioning provision).
+        </div>
+
+        <h3 class="sec">4. Subsequent measurement</h3>
+        <ul>
+          <li><b>Lease liability</b> — increases for interest unwound on the balance (effective interest method) and decreases for lease payments made, exactly like any amortising loan schedule.</li>
+          <li><b>ROU asset</b> — depreciated, usually straight-line, over the <i>shorter of</i> the lease term and the asset's useful life — unless ownership transfers to the lessee by the end of the lease term, or a purchase option is reasonably certain to be exercised, in which case it's depreciated over the asset's full useful life instead. The ROU asset is also subject to IAS 36 impairment testing like any other non-current asset.</li>
+        </ul>
+        <div class="callout c-trap"><span class="ctag">The expense pattern front-loads</span>
+          Because interest on the lease liability is highest in the early years (when the outstanding balance is largest) and typically falls each year, while straight-line depreciation of the ROU asset stays constant, the <b>combined P&amp;L charge is higher in the early years</b> of a lease and lower later — even though cash lease payments might be level throughout. This is a deliberate consequence of the model, and a frequent point of comparison against the old straight-line IAS 17 operating lease expense.
+        </div>
+
+        <h3 class="sec">5. Presentation</h3>
+        <table>
+          <tr><th>Statement</th><th>Treatment</th></tr>
+          <tr><td>SOFP</td><td>ROU asset presented within non-current assets; lease liability split between current and non-current portions</td></tr>
+          <tr><td>SOPL</td><td>Depreciation of the ROU asset (operating expense) and interest on the lease liability (finance cost) shown as two <i>separate</i> line items, not combined into a single "rent expense"</td></tr>
+          <tr><td>Statement of cash flows</td><td>Principal repayment portion of lease payments = financing activity. Interest portion = financing or operating activity — a policy choice, applied consistently with how the entity classifies other interest paid</td></tr>
+        </table>
+
+        <h3 class="sec">6. Recognition exemptions — the only way to avoid the full model</h3>
+        <ul>
+          <li><b>Short-term leases</b> — lease term of 12 months or less, with no purchase option. Election is made <i>by class</i> of underlying asset.</li>
+          <li><b>Low-value assets</b> — e.g. small IT equipment, roughly $5,000 or less when new. Election can be made on a <i>lease-by-lease</i> basis.</li>
+        </ul>
+        <p>Where either exemption is elected, the lessee simply expenses the lease payments — typically straight-line over the lease term — exactly like the old operating lease treatment. There's no ROU asset, no lease liability.</p>
+
+        <h3 class="sec">7. Determining the lease term</h3>
+        <p>Lease term = the non-cancellable period, plus periods covered by an option to extend if the lessee is <b>reasonably certain</b> to exercise it, plus periods covered by an option to terminate if the lessee is reasonably certain <i>not</i> to exercise it. Reassess the lease term if a significant event or change in circumstances occurs that is within the lessee's control and affects whether exercise of an option is reasonably certain.</p>
+
+        <h3 class="sec">8. Sale and leaseback</h3>
+        <div class="callout c-def"><span class="ctag">The key question: has a genuine sale occurred?</span>
+          First assess whether the "sale" leg of the transaction meets the IFRS 15 definition of a sale (has control genuinely transferred to the buyer?).<br><br>
+          <b>If yes</b> — the seller-lessee recognises only the proportion of any gain or loss that relates to the rights <i>transferred</i> to the buyer-lessee (not the full gain on the whole asset), and recognises a ROU asset representing the portion of the previous carrying amount relating to the right of use it has retained.<br><br>
+          <b>If no</b> (control hasn't actually transferred — it's really a financing arrangement in substance) — no sale is recognised at all; the seller continues to recognise the asset on its own books, and instead recognises a financial liability for the proceeds received.
+        </div>
+
+        <h3 class="sec">9. Lessor accounting — largely unchanged from the old standard</h3>
+        <p>Unlike lessees, lessors still classify each lease as either a finance lease or an operating lease.</p>
+        <ul>
+          <li><b>Finance lease</b> — where substantially all the risks and rewards of ownership transfer to the lessee (indicators: ownership transfers by the end of the lease term, a bargain purchase option exists, the lease term covers the major part of the asset's economic life, the present value of the lease payments amounts to substantially all of the asset's fair value, or the asset is so specialised that only the lessee can use it without major modification). The lessor derecognises the underlying asset and instead recognises a receivable equal to its net investment in the lease.</li>
+          <li><b>Operating lease</b> — the lessor keeps the asset on its own SOFP, continues to depreciate it under IAS 16, and recognises lease income (typically on a straight-line basis) over the lease term.</li>
+        </ul>
+      </div>
+
+      <!-- ================= IAS 37 ================= -->
+      <div class="chapter" id="ias37">
+        <h2 class="ctitle">IAS 37 — Provisions, Contingent Liabilities &amp; Contingent Assets</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 8</div>
+
+        <h3 class="sec">1. The core distinction this whole standard is built on</h3>
+        <div class="callout c-def"><span class="ctag">Definitions</span>
+          <b>Provision</b> — a liability of uncertain timing or amount.<br>
+          <b>Contingent liability</b> — either (a) a possible obligation whose existence depends on whether some uncertain future event occurs, not wholly within the entity's control, or (b) a present obligation that isn't recognised because it isn't probable an outflow will be required, or because the amount can't be measured reliably.<br>
+          <b>Contingent asset</b> — a possible asset arising from past events, whose existence will be confirmed only by uncertain future events not wholly within the entity's control.
+        </div>
+
+        <h3 class="sec">2. Recognising a provision — all three conditions required</h3>
+        <div class="callout c-def"><span class="ctag">The three-part test</span>
+          (a) A <b>present obligation</b> (legal or constructive) as a result of a past event.<br>
+          (b) It's <b>probable</b> (more likely than not — over 50%) that an outflow of economic resources will be required to settle it.<br>
+          (c) The amount can be <b>reliably estimated</b>.
+        </div>
+        <div class="callout c-def"><span class="ctag">Legal vs. constructive obligations</span>
+          A <b>legal obligation</b> arises from a contract, legislation, or other operation of law. A <b>constructive obligation</b> arises from the entity's own actions — an established pattern of past practice, published policies, or a sufficiently specific current statement — that has created a valid expectation among other parties that the entity will discharge certain responsibilities, even though there's no strict legal requirement to do so.
+        </div>
+        <p>If any of the three conditions isn't met, no provision is recognised — the item may instead be disclosed as a contingent liability (unless the probability of an outflow is remote, in which case nothing needs to be disclosed at all).</p>
+
+        <h3 class="sec">3. Measurement</h3>
+        <ul>
+          <li>Measured at the <b>best estimate</b> of the expenditure required to settle the obligation at the reporting date.</li>
+          <li>Where the provision involves a large population of similar items (e.g. product warranties across thousands of units sold), use the <b>expected value</b> method — a probability-weighted average of the possible outcomes.</li>
+          <li>Where a single obligation is being measured, the most likely individual outcome may be the best estimate, but other possible outcomes should still be considered — if most of the other possible outcomes are higher (or lower) than the most likely one, the estimate should be adjusted accordingly.</li>
+          <li>Discount to present value where the time value of money is material, using a pre-tax rate reflecting current market assessments — the unwinding of that discount each period is recognised as a finance cost.</li>
+          <li>Risks and uncertainties should be taken into account, but uncertainty is <b>not</b> a licence to create excessive provisions or deliberately overstate liabilities.</li>
+        </ul>
+
+        <h3 class="sec">4. Reimbursements</h3>
+        <div class="callout c-trap"><span class="ctag">Never net the asset against the provision</span>
+          Where some or all of the expenditure needed to settle a provision is expected to be reimbursed by another party (e.g. an insurance claim), recognise the reimbursement as a <b>separate asset</b> — and only once it is <b>virtually certain</b> to be received, and only alongside recognising the provision itself (never the reimbursement asset on its own). In the statement of financial position, the asset and the provision are shown <b>separately</b>, never netted off against each other — though the related expense and reimbursement income may be netted within P&amp;L.
+        </div>
+
+        <h3 class="sec">5. Special cases</h3>
+        <div class="callout c-trap"><span class="ctag">Future operating losses are never provided for</span>
+          Anticipated future trading losses don't meet the "past event" condition — they relate to future activity, not an obligation already created by something that has already happened. No provision is ever recognised for them, however confidently they can be forecast.
+        </div>
+        <div class="callout c-def"><span class="ctag">Onerous contracts</span>
+          A contract where the unavoidable costs of meeting the entity's obligations under it exceed the economic benefits expected to be received. The present obligation under such a contract is recognised and measured as a provision — measured at the <b>lower of</b> the cost of fulfilling the contract and the cost of exiting it (e.g. any compensation or penalties payable for failing to fulfil it).
+        </div>
+        <div class="callout c-def"><span class="ctag">Restructuring provisions</span>
+          Only recognised where there is <b>both</b>: a detailed formal plan identifying, at minimum, the business or part concerned, the principal locations affected, the location, function, and approximate number of employees to be compensated for the termination of their services, the expenditures involved, and when the plan will be implemented; <b>and</b> the entity has raised a valid expectation in those affected that it will actually carry out the restructuring — by starting to implement the plan, or announcing its main features to those affected. A restructuring decision made only by the board or management, without any communication to those affected, is <b>not</b> enough on its own to create a constructive obligation.<br><br>
+          A restructuring provision includes only the <b>direct expenditures</b> necessarily entailed by the restructuring — not costs associated with the ongoing activities of the entity. It excludes things like retraining or relocating continuing staff, marketing, or investment in new systems and distribution networks, since those relate to the future conduct of the business rather than to the restructuring itself.
+        </div>
+
+        <h3 class="sec">6. Contingent liabilities and contingent assets — an important asymmetry</h3>
+        <div class="callout c-formula"><span class="ctag">The probability ladder</span>
+          <b>For a possible obligation (liability side):</b><br>
+          Probable (&gt;50%) and reliably estimable → recognise as a <b>provision</b><br>
+          Possible, but not probable → disclose as a <b>contingent liability</b><br>
+          Remote → do nothing (no disclosure required)<br><br>
+          <b>For a possible asset (asset side) — deliberately asymmetric:</b><br>
+          Virtually certain → recognise as an actual <b>asset</b> (it's no longer "contingent" at all)<br>
+          Probable → disclose as a <b>contingent asset</b><br>
+          Possible or remote → do nothing
+        </div>
+        <div class="callout c-why"><span class="ctag">Why the thresholds don't match</span>
+          IFRS is deliberately more cautious about recognising gains than losses. A liability only needs to be "probable" (just over 50%) to be recognised outright, but an asset needs to be "virtually certain" — a much higher bar — before it earns the same treatment. This reflects prudence: overstating liabilities understates profit (a "safe" error), while overstating assets/income would overstate profit and mislead users about the entity's financial strength.
+        </div>
+
+        <h3 class="sec">7. Disclosure</h3>
+        <p>For provisions: a reconciliation of movements during the period (opening balance, additional provisions made, amounts used, unused amounts reversed, the unwinding of any discount, and closing balance); a brief description of the nature of the obligation and the expected timing of any resulting outflows; an indication of the uncertainties involved; and the amount of any expected reimbursement.</p>
+      </div>
+
+      <!-- ================= FINANCIAL INSTRUMENTS ================= -->
+      <div class="chapter" id="fi">
+        <h2 class="ctitle">Financial Instruments</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 7 · IFRS 9 / IAS 32 / IFRS 7</div>
+
+        <h3 class="sec">1. Three standards, three jobs</h3>
+        <p>This area is really three standards working as a team: <b>IAS 32</b> defines what counts as a financial instrument and, critically, whether it sits on the liability or equity side of the balance sheet; <b>IFRS 9</b> covers recognition, classification, and measurement; <b>IFRS 7</b> covers disclosure. FR focuses mainly on the first two.</p>
+        <div class="callout c-def"><span class="ctag">Core definitions</span>
+          <b>Financial instrument</b> — any contract that gives rise to a financial asset of one entity and a financial liability or equity instrument of another.<br>
+          <b>Financial asset</b> — cash; an equity instrument of another entity; a contractual right to receive cash or another financial asset; or a contractual right to exchange financial instruments under potentially favourable conditions.<br>
+          <b>Financial liability</b> — a contractual obligation to deliver cash or another financial asset, or to exchange financial instruments under potentially unfavourable conditions.<br>
+          <b>Equity instrument</b> — any contract evidencing a residual interest in an entity's assets after deducting all of its liabilities.
+        </div>
+
+        <h3 class="sec">2. IAS 32 — liability or equity? Substance over legal form</h3>
+        <div class="callout c-def"><span class="ctag">The test that decides everything</span>
+          The critical question is: does the <b>issuer</b> have a contractual <b>obligation</b> to deliver cash or another financial asset? If yes, it's a liability — regardless of what it's legally called.
+        </div>
+        <table>
+          <tr><th>Instrument</th><th>Classification</th><th>Why</th></tr>
+          <tr><td>Ordinary shares</td><td>Equity</td><td>No obligation to repay capital; dividends are entirely at the issuer's discretion</td></tr>
+          <tr><td>Redeemable preference shares</td><td>Liability</td><td>The issuer has a contractual obligation to redeem (repay) them — it's really a loan wearing a "shares" label</td></tr>
+          <tr><td>Irredeemable preference shares with discretionary dividends</td><td>Equity</td><td>No obligation to repay capital or to pay a dividend</td></tr>
+        </table>
+
+        <h3 class="sec">3. Compound instruments — split accounting</h3>
+        <p>A convertible bond is the classic example: it contains a <b>liability component</b> (the issuer's obligation to pay interest and, if not converted, redeem the principal) and an <b>equity component</b> (the holder's option to convert into a fixed number of shares instead).</p>
+        <div class="callout c-formula"><span class="ctag">Two-step split</span>
+          <b>Step 1</b> — calculate the fair value of the liability component: discount the future cash flows (interest and redemption amount) at the market interest rate for an <b>equivalent non-convertible</b> bond (i.e. what the same cash flows would be worth without the conversion option attached).<br>
+          <b>Step 2</b> — equity component = total proceeds received <b>minus</b> the liability component calculated in step 1 (a residual approach — the equity element is whatever's left over).
+        </div>
+        <div class="callout c-example"><span class="ctag">Worked example</span>
+          A company issues a $10m 3-year convertible bond, paying 4% annual coupon, convertible into ordinary shares at maturity. An equivalent non-convertible bond would carry an 8% market rate.
+          <div class="worked">Liability component - PV of cash flows at 8%:
+  Interest: 10m x 4% = 400,000/year for 3 years
+    PV factor (8%, 3 yrs annuity) approx 2.577
+    400,000 x 2.577                    = 1,030,800
+  Redemption: 10,000,000 x 0.794 (PV factor, 8%, yr 3)
+                                        = 7,940,000
+  Liability component                  = 8,970,800
+
+Equity component (residual):
+  10,000,000 - 8,970,800               = 1,029,200
+
+Journal on issue:
+  Dr Cash                  10,000,000
+    Cr Liability component             8,970,800
+    Cr Equity (Other reserve)          1,029,200</div>
+          Subsequently, the liability component is measured at <b>amortised cost</b> using the effective interest method (unwinding toward the $10m redemption value at the 8% effective rate) — the equity component is <b>never remeasured</b>, it stays fixed at its initial split amount.
+        </div>
+
+        <h3 class="sec">4. IFRS 9 — classifying financial assets</h3>
+        <p>Classification is decided at initial recognition using two tests together.</p>
+        <div class="callout c-def"><span class="ctag">The two tests</span>
+          <b>Business model test</b> — is the asset held to <i>collect</i> contractual cash flows only, held to <i>both</i> collect cash flows and sell, or neither?<br>
+          <b>Contractual cash flow characteristics test (the "SPPI" test)</b> — do the contractual terms give rise to cash flows that are <b>S</b>olely <b>P</b>ayments of <b>P</b>rincipal and <b>I</b>nterest on specified dates?
+        </div>
+        <table>
+          <tr><th>Category</th><th>Conditions</th><th>Typical example</th></tr>
+          <tr><td>Amortised cost</td><td>Hold to collect + SPPI</td><td>Trade receivables, simple loans</td></tr>
+          <tr><td>FVTOCI</td><td>Hold to collect and sell + SPPI</td><td>Debt held for liquidity management</td></tr>
+          <tr><td>FVTPL</td><td>Doesn't meet either of the above (default)</td><td>Derivatives, trading investments, most equity investments</td></tr>
+        </table>
+        <div class="callout c-trap"><span class="ctag">The equity FVTOCI election — and why it doesn't behave like debt FVTOCI</span>
+          For an equity investment not held for trading, an entity can make an <b>irrevocable election</b> at initial recognition to present fair value changes in OCI instead of P&amp;L. But this behaves differently from debt FVTOCI in two ways: dividend income is still recognised in <b>P&amp;L</b> either way, and — the bigger trap — on disposal, the cumulative gain or loss for an equity FVTOCI investment <b>stays in equity permanently</b> (it does not recycle to P&amp;L). For debt FVTOCI, by contrast, the cumulative OCI gain or loss <i>is</i> reclassified ("recycled") to P&amp;L on disposal.
+        </div>
+
+        <h3 class="sec">5. Measurement</h3>
+        <ul>
+          <li><b>Initial measurement:</b> fair value plus transaction costs — except for FVTPL instruments, where transaction costs are expensed immediately rather than added to the initial carrying amount.</li>
+          <li><b>Amortised cost:</b> effective interest method throughout.</li>
+          <li><b>FVTOCI (debt):</b> remeasured to fair value each period with gains/losses to OCI, but interest income is still calculated and recognised in P&amp;L using the effective interest method — exactly as if it were amortised cost — with only the fair value adjustment itself going to OCI.</li>
+          <li><b>FVTPL:</b> remeasured to fair value each period, with all gains, losses, and any dividend/interest income recognised in P&amp;L.</li>
+        </ul>
+
+        <h3 class="sec">6. Impairment — the Expected Credit Loss (ECL) model</h3>
+        <p>IFRS 9 replaced the old "incurred loss" model (which only recognised a loss once a default had actually happened) with a forward-looking ECL model that recognises expected losses earlier.</p>
+        <div class="callout c-def"><span class="ctag">The general 3-stage approach</span>
+          <b>Stage 1</b> — no significant increase in credit risk since initial recognition → recognise <b>12-month ECL</b>.<br>
+          <b>Stage 2</b> — a significant increase in credit risk since initial recognition, but not yet credit-impaired → recognise <b>lifetime ECL</b>.<br>
+          <b>Stage 3</b> — credit-impaired → recognise lifetime ECL, and interest income is now calculated on the <i>net</i> carrying amount (after deducting the impairment allowance) rather than the gross amount.
+        </div>
+        <div class="callout c-def"><span class="ctag">Simplified approach — trade receivables</span>
+          For trade receivables and contract assets without a significant financing component, entities always recognise <b>lifetime ECL</b> from initial recognition, with no need to track which stage a balance has migrated to. In practice this is usually done using a <b>provision matrix</b> — applying historical default rates by ageing bucket (e.g. current, 30 days overdue, 60 days overdue) to the receivables balance.
+        </div>
+
+        <h3 class="sec">7. Financial liabilities</h3>
+        <p>Measured at <b>amortised cost</b> by default, using the effective interest method — the same mechanic as the liability component of a compound instrument. FVTPL applies only to liabilities held for trading, those designated at FVTPL under the fair value option, and contingent consideration arising in a business combination.</p>
+
+        <h3 class="sec">8. Derecognition</h3>
+        <p>A financial asset is derecognised when the contractual rights to its cash flows expire, or when the asset is transferred and substantially all the risks and rewards of ownership go with it. A financial liability is derecognised when the obligation is discharged, cancelled, or expires.</p>
+
+        <h3 class="sec">9. Disclosure (IFRS 7)</h3>
+        <p>The significance of financial instruments for the entity's financial position and performance, and the nature and extent of risks arising from them — principally credit risk, liquidity risk, and market risk — together with how the entity manages those risks.</p>
+      </div>
+
+      <!-- ================= IAS 33 ================= -->
+      <div class="chapter" id="ias33">
+        <h2 class="ctitle">IAS 33 — Earnings Per Share</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 9</div>
+
+        <h3 class="sec">1. Why EPS gets its own standard</h3>
+        <p>EPS is probably the single most quoted number from a set of financial statements — it's the headline figure behind the P/E ratio and most investor commentary. Precisely because it's so widely used for comparison across companies and over time, IAS 33 exists purely to standardise how it's calculated, so that the number means the same thing wherever it's quoted.</p>
+        <p>Two versions are required: <b>basic EPS</b> (using shares actually in issue) and <b>diluted EPS</b> (showing what EPS would be if every potentially dilutive instrument — convertible bonds, options — were actually converted or exercised).</p>
+
+        <h3 class="sec">2. Basic EPS</h3>
+        <div class="callout c-formula"><span class="ctag">Formula</span>Basic EPS = Profit or loss attributable to ordinary equity holders of the parent ÷ Weighted average number of ordinary shares in issue during the period</div>
+
+        <h4 class="subsec">The numerator</h4>
+        <div class="callout c-trap"><span class="ctag">Cumulative vs. non-cumulative preference dividends</span>
+          Start with profit attributable to owners of the parent, then deduct preference dividends. For <b>non-cumulative</b> preference shares, deduct only the dividend actually declared for the period. For <b>cumulative</b> preference shares, deduct the <b>full entitlement for the period regardless of whether it was actually declared</b> — this trips candidates up because it means a company that skipped a cumulative preference dividend still reduces its EPS numerator as if it had paid it.
+        </div>
+
+        <h4 class="subsec">The denominator — weighted average number of shares (WANOS)</h4>
+        <table>
+          <tr><th>Event</th><th>Treatment</th></tr>
+          <tr><td>Shares issued for cash at full market price during the year</td><td>Time-apportion: weight the new shares only for the period they were actually in issue</td></tr>
+          <tr><td>Bonus issue (capitalisation issue)</td><td>No new resources received, so treat as if it had <b>always</b> been in issue — apply the bonus fraction to shares in issue at the start of the year, and restate the comparative prior year's EPS using the same fraction</td></tr>
+          <tr><td>Rights issue at a discount</td><td>A hybrid of a bonus element and a cash issue — requires a Theoretical Ex-Rights Price (TERP) calculation, below</td></tr>
+        </table>
+
+        <h3 class="sec">3. Rights issues — the TERP calculation</h3>
+        <div class="callout c-formula"><span class="ctag">Method</span>
+          TERP = (Market value of shares immediately before the rights issue + cash raised from the rights issue) ÷ Total number of shares after the rights issue<br><br>
+          Bonus fraction = Market price cum-rights (just before the issue) ÷ TERP<br><br>
+          Apply the bonus fraction to shares in issue <b>before</b> the rights issue date; shares issued <b>from</b> the rights date onward are simply added at full weight. Also restate the comparative prior year's EPS using the same bonus fraction, exactly as for a bonus issue.
+        </div>
+        <div class="callout c-example"><span class="ctag">Worked example</span>
+          A company has 4,000,000 shares in issue, trading at $2.50 cum-rights. On 1 July it makes a 1-for-4 rights issue at $2.00 (year end 31 December).
+          <div class="worked">Shares issued in the rights issue: 4,000,000 / 4 = 1,000,000
+Cash raised: 1,000,000 x $2.00 = $2,000,000
+
+TERP = (4,000,000 x $2.50 + $2,000,000) / 5,000,000
+     = (10,000,000 + 2,000,000) / 5,000,000
+     = $2.40
+
+Bonus fraction = $2.50 / $2.40 = 1.0417
+
+WANOS for the year:
+  1 Jan - 30 Jun: 4,000,000 x 1.0417 x 6/12 = 2,083,400
+  1 Jul - 31 Dec: 5,000,000        x 6/12   = 2,500,000
+  WANOS                                     = 4,583,400
+
+Prior year comparative EPS is also multiplied by
+1/1.0417 (i.e. divided by the bonus fraction) for
+comparability.</div>
+        </div>
+
+        <h3 class="sec">4. Diluted EPS</h3>
+        <p>Adjusts both the numerator and denominator for the effect of dilutive potential ordinary shares.</p>
+        <div class="callout c-def"><span class="ctag">Convertible instruments</span>
+          <b>Numerator:</b> add back the after-tax interest expense (for a convertible bond) or preference dividend (for convertible preference shares) that would have been saved had conversion happened at the start of the period.<br>
+          <b>Denominator:</b> add the additional ordinary shares that would be issued on conversion, weighted for the period they'd have been outstanding (from the start of the year if the instrument existed throughout, or from its issue date if issued mid-year).
+        </div>
+        <div class="callout c-def"><span class="ctag">Share options and warrants — the assumed proceeds method</span>
+          Assume the options are exercised, generating "assumed proceeds" (exercise price × number of options). Assume those proceeds are then used to buy back shares at the <b>average market price</b> for the period. Only the <b>incremental</b> shares — options exercised, minus shares deemed bought back — are added to the diluted denominator. This reflects that options are only genuinely dilutive to the extent their exercise price sits below the market price.
+        </div>
+        <div class="callout c-example"><span class="ctag">Worked example — options</span>
+          A company has 1,000,000 options outstanding with an exercise price of $3.00. Average market price for the year was $5.00.
+          <div class="worked">Assumed proceeds on exercise: 1,000,000 x $3.00 = $3,000,000
+Shares "bought back" at average market price:
+  $3,000,000 / $5.00 = 600,000 shares
+
+Incremental shares added to diluted WANOS:
+  1,000,000 - 600,000 = 400,000</div>
+        </div>
+
+        <h3 class="sec">5. The anti-dilution rule</h3>
+        <div class="callout c-trap"><span class="ctag">Only dilutive instruments are included</span>
+          A potential ordinary share is only included in diluted EPS if it's genuinely <b>dilutive</b> — i.e. its inclusion would <i>decrease</i> EPS (or increase a loss per share). If including an instrument would actually <i>increase</i> EPS (an "anti-dilutive" effect), it's excluded from the diluted calculation entirely. This is exactly why diluted EPS is always lower than or equal to basic EPS, never higher — and why, for a loss-making company, potential ordinary shares are usually anti-dilutive and therefore excluded (converting them would reduce the loss per share, which would flatter the numbers, so IAS 33 doesn't allow it).
+        </div>
+
+        <h3 class="sec">6. Presentation</h3>
+        <p>Basic and diluted EPS are presented with <b>equal prominence</b> on the face of the statement of profit or loss, for both profit from continuing operations and total profit for the period (with discontinued operations shown either on the face or in the notes) — and are still presented even where the result is a loss per share.</p>
+      </div>
+
+      <!-- ================= IAS 7 ================= -->
+      <div class="chapter" id="ias7">
+        <h2 class="ctitle">IAS 7 — Statement of Cash Flows</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 9</div>
+
+        <h3 class="sec">1. Why cash flow gets its own statement</h3>
+        <p>Profit is shaped by accounting policy choices, estimates, and non-cash items (depreciation, provisions, fair value movements) — two companies with identical cash positions can report very different profits depending on those choices. The statement of cash flows strips all of that away and shows what actually happened to cash, classified into operating, investing, and financing activities, so users can assess an entity's ability to generate cash and how it's choosing to use it.</p>
+        <div class="callout c-def"><span class="ctag">Definitions</span>
+          <b>Cash</b> — cash on hand and demand deposits.<br>
+          <b>Cash equivalents</b> — short-term, highly liquid investments that are readily convertible to known amounts of cash and subject to an insignificant risk of changes in value — in practice, normally an original maturity of three months or less from the date of acquisition.
+        </div>
+
+        <h3 class="sec">2. The three classifications</h3>
+        <table>
+          <tr><th>Activity</th><th>Covers</th></tr>
+          <tr><td>Operating</td><td>The principal revenue-producing activities — cash from customers, cash paid to suppliers and employees, other operating expenses, tax paid</td></tr>
+          <tr><td>Investing</td><td>Acquisition/disposal of long-term assets (PPE, intangibles, investment property) and other investments not treated as cash equivalents; often also interest and dividends received</td></tr>
+          <tr><td>Financing</td><td>Changes in the size and composition of equity capital and borrowings — share issue proceeds, loan proceeds/repayments, the principal element of lease payments, dividends paid</td></tr>
+        </table>
+        <p>Operating activities can be presented using the <b>direct method</b> (showing actual gross cash receipts and payments) or the <b>indirect method</b> (starting from profit before tax and adjusting for non-cash items and working capital movements). The indirect method is what's almost always examined.</p>
+        <div class="callout c-def"><span class="ctag">Policy choices, applied consistently</span>
+          Interest paid and interest/dividends received can each be classified as either operating or financing/investing — it's a policy choice, but must be applied consistently period to period.
+        </div>
+
+        <h3 class="sec">3. Building the indirect-method operating section</h3>
+        <div class="callout c-formula"><span class="ctag">The standard build-up</span>
+          <div class="worked">Profit before tax
++ Depreciation, amortisation, impairment (non-cash expenses)
++ Interest expense (added back - it's a financing item,
+  shown separately later)
+- Interest/investment income (removed - shown separately
+  under investing)
++/- Loss/(profit) on disposal of non-current assets (the
+  disposal PROCEEDS appear in full under investing, so the
+  P&L gain/loss element must be removed here to avoid
+  double-counting)
++/- Working capital movements:
+    (increase)/decrease in inventories
+    (increase)/decrease in receivables
+    increase/(decrease) in payables
+= Cash generated from operations
+- Interest paid
+- Tax paid
+= Net cash from operating activities</div>
+        </div>
+
+        <h3 class="sec">4. The reconstruction workings — where most of the marks actually sit</h3>
+        <div class="callout c-example"><span class="ctag">Tax paid — T-account approach</span>
+          <div class="worked">                    TAX PAYABLE
+Tax paid (bal. fig)   X   | Opening balance          X
+Closing balance       X   | P&L tax charge (current
+                           |   tax portion only -
+                           |   deferred tax is non-cash)  X
+                      ---   ----
+                       X                                X
+
+Tax paid = Opening balance + P&L tax charge - Closing balance</div>
+        </div>
+        <div class="callout c-example"><span class="ctag">PPE — reconstructing cash paid for additions</span>
+          <div class="worked">                 PPE (carrying amount)
+Opening CA            X   | Depreciation charge          X
+Additions (cash,      X   | Disposals (CA of items sold) X
+  bal. fig)               |
+Revaluation surplus   X   | Closing CA                   X
+  (non-cash)              |
+                      ---   ----
+                       X                                X
+
+Cash paid for additions = the balancing figure once
+opening CA, depreciation, disposals (at CA), revaluation
+movements, and closing CA are all known.
+
+Disposal proceeds (a separate, investing-activities figure)
+  = CA of assets disposed +/- profit or loss on disposal
+    (profit/loss on disposal comes from the P&L, or is given)</div>
+        </div>
+        <div class="callout c-example"><span class="ctag">Share capital and premium — cash proceeds from issue</span>
+          <div class="worked">(Opening share capital + share premium)
++ Proceeds from shares issued for CASH (bal. fig)
++ Bonus issue (NO cash effect - just reclassifies
+  reserves, e.g. Dr Retained earnings / Cr Share capital)
+= (Closing share capital + share premium)</div>
+          A bonus issue never appears as a cash flow at all — it's excluded entirely from the statement of cash flows, since no cash moves; it would, however, be disclosed as a significant non-cash transaction in the notes if material.
+        </div>
+
+        <h3 class="sec">5. Cash and cash equivalents reconciliation</h3>
+        <p>The statement closes with a reconciliation of the opening balance of cash and cash equivalents to the closing balance, matching the net increase/decrease shown by the three activity sections. Where any cash balances are restricted (not available for use by the reporting entity or group), these are disclosed separately with an explanation.</p>
+
+        <h3 class="sec">6. Non-cash transactions</h3>
+        <div class="callout c-trap"><span class="ctag">Excluded entirely from the statement</span>
+          Transactions that don't involve cash at all — acquiring an asset by taking on a finance lease, a bonus issue of shares, or converting debt into equity — are <b>excluded entirely</b> from the statement of cash flows itself, but disclosed elsewhere in the notes if material, so users can still see they occurred.
+        </div>
+      </div>
+
+      <!-- ================= IAS 8 ================= -->
+      <div class="chapter" id="ias8">
+        <h2 class="ctitle">IAS 8 — Accounting Policies, Changes in Accounting Estimates &amp; Errors</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 10</div>
+
+        <h3 class="sec">1. Purpose</h3>
+        <p>Three genuinely different situations get confused with each other constantly in practice, and IAS 8 exists to keep them separate — because each one is accounted for completely differently. Telling them apart correctly is most of what this standard actually tests.</p>
+
+        <h3 class="sec">2. Accounting policies</h3>
+        <p>The specific principles, bases, conventions, rules, and practices an entity applies in preparing and presenting its financial statements. Where no specific IFRS addresses a transaction, management uses judgement to develop a policy, referring (in descending order of authority) to: requirements and guidance in IFRSs dealing with similar or related issues, then the Conceptual Framework's definitions and recognition criteria, and only then — optionally, and only to the extent they don't conflict with IFRS — other standard-setters' pronouncements or accepted industry practice.</p>
+        <p>Once selected, policies are applied <b>consistently</b> for similar transactions, unless an IFRS specifically permits or requires categorisation into groups for which different policies may be appropriate.</p>
+
+        <h3 class="sec">3. Change in accounting policy</h3>
+        <div class="callout c-def"><span class="ctag">Only permitted if...</span>
+          (a) required by an IFRS, or (b) the change results in the financial statements providing more reliable and more relevant information. Applying a policy to transactions that are substantively different from anything that happened before, or to transactions that simply never occurred before, is <b>not</b> a change in policy — it's just applying a policy for the first time to a new situation.
+        </div>
+        <div class="callout c-formula"><span class="ctag">Accounting treatment — retrospective</span>
+          Restate comparative amounts as if the new policy had <b>always</b> applied, and adjust the opening balance of retained earnings (or another relevant equity component) for the earliest period presented — unless it's impracticable to determine either the period-specific or the cumulative effect.
+        </div>
+
+        <h3 class="sec">4. Change in accounting estimate</h3>
+        <p>A normal, necessary consequence of the estimation inherent in preparing financial statements — for example, a change in an asset's useful life, a revised allowance for doubtful receivables, a revised NRV for inventory, or a revised warranty obligation.</p>
+        <div class="callout c-formula"><span class="ctag">Accounting treatment — prospective</span>
+          Recognise the effect in P&amp;L in the period of change (if it only affects that period) or in the period of change and future periods (if it affects both). Prior periods are <b>never</b> restated, and there is <b>no</b> adjustment to opening retained earnings.
+        </div>
+        <div class="callout c-trap"><span class="ctag">If in doubt, it's an estimate</span>
+          Where it's genuinely difficult to distinguish a change in accounting policy from a change in accounting estimate, IAS 8 requires it to be treated <b>as a change in estimate</b> — a deliberate practical simplification, and itself a testable point.
+        </div>
+
+        <h3 class="sec">5. Prior period errors</h3>
+        <div class="callout c-def"><span class="ctag">Definition</span>
+          Omissions from, and misstatements in, the financial statements for one or more prior periods, arising from a failure to use — or a misuse of — reliable information that was available when those statements were authorised for issue, and that could reasonably have been expected to have been obtained and taken into account. Includes mathematical mistakes, mistakes in applying accounting policies, oversights or misinterpretations of facts, and fraud.
+        </div>
+        <div class="callout c-formula"><span class="ctag">Accounting treatment — retrospective restatement</span>
+          Correct the error as if it had never occurred, by restating the comparative amounts for the prior period(s) in which it arose — and, if the error occurred before the earliest period presented, restating the opening balances of assets, liabilities, and equity (including retained earnings) for that earliest prior period.
+        </div>
+
+        <h3 class="sec">6. The distinction that actually gets tested</h3>
+        <div class="callout c-why"><span class="ctag">Error vs. estimate change — the real test</span>
+          The question to ask is: was the original figure wrong <b>given what was known at the time</b> it was prepared? If yes — the information existed and was simply used incorrectly or overlooked — it's an <b>error</b> (retrospective). If the original figure was reasonable based on what was known then, and it's only <b>new information that has since emerged</b> that changes the picture, it's a <b>change in estimate</b> (prospective). The same £ movement in the accounts can be either, depending entirely on this distinction — which is exactly why exam scenarios are written to test it directly.
+        </div>
+        <div class="callout c-example"><span class="ctag">Side-by-side comparison</span>
+          <div class="worked">SCENARIO A - change in estimate:
+  A machine's useful life was reasonably estimated at 10
+  years when purchased. Three years later, new information
+  emerges (unexpected wear, a change in how the asset is
+  used) suggesting only 5 years remain in total.
+  -> PROSPECTIVE: recalculate the remaining depreciable
+     amount over the revised remaining life, from this
+     year forward. No restatement of prior years.
+
+SCENARIO B - prior period error:
+  A bookkeeper accidentally used the wrong depreciation
+  rate last year (applied 5% instead of the correct 10%
+  straight-line rate that was always the intended policy),
+  understating last year's depreciation expense.
+  -> RETROSPECTIVE: restate last year's comparative
+     figures to what they should have been, and adjust
+     the opening retained earnings for the current year
+     to remove the cumulative effect of the mistake.</div>
+        </div>
+
+        <h3 class="sec">7. Impracticability</h3>
+        <p>If retrospective application (for a policy change) or retrospective restatement (for an error) is impracticable for a particular prior period, or for determining the cumulative effect, the new policy is applied — or the error corrected — prospectively from the earliest date practicable instead.</p>
+
+        <h3 class="sec">8. Disclosure</h3>
+        <p>For a change in accounting policy: its nature, the reasons the new policy provides more reliable/relevant information, and the amount of the adjustment for the current and each prior period presented. For a change in accounting estimate: its nature and amount, and its effect on the current and future periods (where determinable). For a prior period error: its nature, and the amount of the correction for each prior period presented.</p>
+      </div>
+
+      <!-- ================= IAS 10 ================= -->
+      <div class="chapter" id="ias10">
+        <h2 class="ctitle">IAS 10 — Events After the Reporting Period</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 10</div>
+
+        <h3 class="sec">1. The window this standard covers</h3>
+        <p>Financial statements aren't finished the moment the reporting period ends — there's always a gap before they're actually authorised for issue, during which more information comes in. IAS 10 governs what to do with anything that happens, or comes to light, during that gap.</p>
+        <div class="callout c-def"><span class="ctag">Definition</span>
+          Events after the reporting period are events, favourable or unfavourable, that occur between the end of the reporting period and the date the financial statements are authorised for issue. There are two categories, and the whole standard hinges on telling them apart correctly.
+        </div>
+
+        <h3 class="sec">2. Adjusting events</h3>
+        <div class="callout c-def"><span class="ctag">The test</span>
+          An adjusting event provides evidence of conditions that <b>already existed</b> at the end of the reporting period. Because the underlying condition was already true at that date, the financial statements are <b>adjusted</b> to reflect it.
+        </div>
+        <ul>
+          <li>A court case settled after the reporting date that confirms the entity already had a present obligation at the reporting date (recognise or adjust a provision accordingly)</li>
+          <li>A customer's bankruptcy after the reporting date, confirming a receivable was already impaired at the reporting date (write the receivable down)</li>
+          <li>Sale of inventory after the reporting date at a price below its carrying amount, providing evidence of its NRV at the reporting date (write inventory down)</li>
+          <li>Determination, after the reporting date, of the actual cost of assets purchased — or proceeds of assets sold — before the reporting date</li>
+          <li>Discovery of fraud or errors showing the financial statements were incorrect</li>
+        </ul>
+
+        <h3 class="sec">3. Non-adjusting events</h3>
+        <div class="callout c-def"><span class="ctag">The test</span>
+          A non-adjusting event is indicative of conditions that <b>arose after</b> the end of the reporting period. Since the condition didn't exist at the reporting date, the financial statements are <b>not adjusted</b> — but the event is disclosed if it's material enough that its non-disclosure could influence users' decisions.
+        </div>
+        <ul>
+          <li>A major business combination, or disposal of a major subsidiary, after the reporting date</li>
+          <li>Announcing a plan to discontinue an operation</li>
+          <li>Destruction of a major production plant by fire after the reporting date</li>
+          <li>Announcing or beginning to implement a major restructuring</li>
+          <li>Abnormally large changes in asset prices or foreign exchange rates after the reporting date</li>
+          <li>Entering into significant commitments or contingent liabilities after the reporting date (e.g. issuing guarantees)</li>
+          <li>Changes in tax rates or tax law enacted or announced after the reporting date with a significant effect on current or deferred tax</li>
+        </ul>
+
+        <h3 class="sec">4. Dividends declared after the reporting period</h3>
+        <div class="callout c-trap"><span class="ctag">Not a liability at the reporting date</span>
+          A dividend declared or proposed <b>after</b> the reporting period is <b>not</b> recognised as a liability at the reporting date — there was no present obligation to pay it as at that date, since the decision to declare it hadn't yet been made. It's disclosed in the notes instead, as a non-adjusting event.
+        </div>
+
+        <h3 class="sec">5. When it isn't just "adjust or disclose" — the going concern override</h3>
+        <div class="callout c-trap"><span class="ctag">A third, more fundamental response</span>
+          If management determines <b>after</b> the reporting period that it intends to liquidate the entity, or has no realistic alternative but to do so, the financial statements must <b>not</b> be prepared on a going concern basis at all. This isn't simply an adjusting or non-adjusting event — it changes the entire basis on which the financial statements are prepared, and overrides the normal adjust/disclose framework entirely.
+        </div>
+
+        <h3 class="sec">6. Date of authorisation for issue</h3>
+        <p>The financial statements reflect events up to the date they are authorised for issue — typically the date the board approves them for issue, which can occur <i>before</i> shareholders formally approve them at an AGM. Formal shareholder approval at a later AGM doesn't extend the window during which events are still considered.</p>
+
+        <h3 class="sec">7. Disclosure</h3>
+        <p>The date the financial statements were authorised for issue, and who gave that authorisation; whether the entity's owners or others have the power to amend the financial statements after issue; and, for each material non-adjusting event, its nature and an estimate of its financial effect (or a statement that such an estimate cannot be made).</p>
+      </div>
+
+      <!-- ================= FRAMEWORK ================= -->
+      <div class="chapter" id="framework">
+        <h2 class="ctitle">Conceptual Framework for Financial Reporting</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 11</div>
+
+        <h3 class="sec">1. What the Framework actually is — and isn't</h3>
+        <div class="callout c-trap"><span class="ctag">Not itself an IFRS</span>
+          The Conceptual Framework is <b>not</b> an accounting standard, and it does not override any specific IFRS. If a specific standard conflicts with the Framework, the standard wins. Its actual role is to: assist the IASB in developing new and revised standards; assist preparers in developing accounting policies where no standard specifically addresses an issue; and assist everyone else in understanding and interpreting IFRS consistently.
+        </div>
+
+        <h3 class="sec">2. The objective of financial reporting</h3>
+        <p>To provide financial information about the reporting entity that is useful to existing and potential investors, lenders, and other creditors in making decisions about providing resources to the entity — buying, selling, or holding equity/debt instruments, or providing/settling loans and other credit.</p>
+
+        <h3 class="sec">3. Qualitative characteristics — two tiers</h3>
+        <div class="callout c-def"><span class="ctag">Fundamental characteristics — both required</span>
+          <b>Relevance</b> — capable of making a difference to users' decisions. Has predictive value (helps predict future outcomes), confirmatory value (confirms or changes prior evaluations), or both. Materiality is an entity-specific aspect of relevance — information is material if omitting, misstating, or obscuring it could reasonably be expected to influence users' decisions.<br><br>
+          <b>Faithful representation</b> — the information must be <b>complete</b>, <b>neutral</b> (free from bias), and <b>free from error</b>. "Free from error" doesn't mean perfectly accurate in every respect — estimates are inherently part of financial reporting — it means there are no errors or omissions in the description of the phenomenon, and the process used to produce the reported information has itself been selected and applied without error.
+        </div>
+        <div class="callout c-def"><span class="ctag">Enhancing characteristics</span>
+          <b>Comparability</b> — enables users to identify and understand similarities and differences between items, both across different entities and over time for the same entity.<br>
+          <b>Verifiability</b> — different knowledgeable, independent observers could reach general consensus that a particular depiction is a faithful representation.<br>
+          <b>Timeliness</b> — information is available to decision-makers in time to actually influence their decisions.<br>
+          <b>Understandability</b> — information is classified, characterised, and presented clearly and concisely — though this doesn't mean excluding genuinely complex information just because it's hard to simplify; users are assumed to have a reasonable knowledge of business and economic activities.
+        </div>
+        <div class="callout c-why"><span class="ctag">Why relevance and faithful representation are "fundamental" but the rest are only "enhancing"</span>
+          Information that isn't relevant, or that doesn't faithfully represent what it claims to represent, isn't useful <i>no matter how comparable, verifiable, timely, or understandable it is</i> — those four qualities can only make already-useful information even more useful; they can't rescue information that fails the two fundamental tests in the first place. That's the logic behind the two-tier structure.
+        </div>
+
+        <h3 class="sec">4. Going concern</h3>
+        <p>The underlying assumption behind the entire Framework: financial statements are normally prepared on the assumption that the entity will continue in operation for the foreseeable future, with neither the intention nor the need to liquidate or materially curtail the scale of its operations.</p>
+
+        <h3 class="sec">5. The elements of financial statements</h3>
+        <table>
+          <tr><th>Element</th><th>Definition</th></tr>
+          <tr><td>Asset</td><td>A present economic resource controlled by the entity as a result of past events (an economic resource being a right that has the potential to produce economic benefits)</td></tr>
+          <tr><td>Liability</td><td>A present obligation of the entity to transfer an economic resource, as a result of past events</td></tr>
+          <tr><td>Equity</td><td>The residual interest in the assets of the entity after deducting all its liabilities</td></tr>
+          <tr><td>Income</td><td>Increases in assets, or decreases in liabilities, resulting in increases in equity, other than contributions from equity holders</td></tr>
+          <tr><td>Expenses</td><td>Decreases in assets, or increases in liabilities, resulting in decreases in equity, other than distributions to equity holders</td></tr>
+        </table>
+
+        <h3 class="sec">6. Recognition and derecognition</h3>
+        <div class="callout c-def"><span class="ctag">Recognition criteria</span>
+          An item is recognised if it meets the definition of one of the elements above, <b>and</b> recognising it provides users with relevant information about the item <b>and</b> a faithful representation of it — subject always to the pervasive cost constraint (the cost of providing the information shouldn't exceed the benefit users get from it).
+        </div>
+        <p><b>Derecognition</b> is the removal of all or part of a previously recognised asset or liability from the statement of financial position — normally occurring when the item no longer meets the definition of an asset or liability (e.g. control over an asset is lost, or a liability's obligation ceases to exist).</p>
+
+        <h3 class="sec">7. Measurement bases</h3>
+        <table>
+          <tr><th>Basis</th><th>Description</th></tr>
+          <tr><td>Historical cost</td><td>Based on the transaction price or value of the resource at the time it was acquired or incurred, updated over time for depreciation, amortisation, or impairment</td></tr>
+          <tr><td>Fair value</td><td>The price that would be received to sell an asset (or paid to transfer a liability) in an orderly transaction between market participants — an exit-based, market-based measure</td></tr>
+          <tr><td>Value in use / fulfilment value</td><td>The present value of cash flows an entity expects to derive from continuing to use an asset (or expects to pay in fulfilling a liability) — entity-specific, not market-based</td></tr>
+          <tr><td>Current cost</td><td>The cost of an equivalent asset at the measurement date, comprising the consideration that would be paid at that date plus transaction costs</td></tr>
+        </table>
+
+        <h3 class="sec">8. Concepts of capital maintenance</h3>
+        <div class="callout c-def"><span class="ctag">Two competing views of what "profit" means</span>
+          <b>Financial capital maintenance</b> — profit is earned only if the financial (money) amount of net assets at the end of the period exceeds the financial amount at the start, after excluding distributions to and contributions from owners. This is the concept almost universally used in practice.<br><br>
+          <b>Physical capital maintenance</b> — profit is earned only if the entity's physical productive capacity (its operating capability) at the end of the period exceeds that at the start, again after excluding distributions and contributions. This requires all price changes affecting the entity's assets and liabilities to be treated as capital maintenance adjustments within equity, rather than as profit.
+        </div>
+      </div>
+
+      <!-- ================= IFRS S1 ================= -->
+      <div class="chapter" id="ifrss1">
+        <h2 class="ctitle">IFRS S1 — Sustainability-related Financial Disclosures</h2>
+        <div class="ctitle-sub">Single Entity · Tracker Block 11 · Awareness level</div>
+
+        <h3 class="sec">1. Where this fits, and how deep FR actually goes</h3>
+        <p>IFRS S1 is issued by the <b>ISSB</b> (International Sustainability Standards Board) — a sister board to the IASB, both operating under the IFRS Foundation. It sits in a related but separate suite: the "IFRS Sustainability Disclosure Standards," not the core IFRS Accounting Standards that the rest of this Hub covers. For FR, this topic is tested at an <b>awareness and discussion level</b> — understanding why sustainability reporting now sits alongside financial reporting, and its general structure — rather than technical mastery of specific disclosure metrics.</p>
+
+        <h3 class="sec">2. Objective</h3>
+        <p>To require an entity to disclose information about its sustainability-related risks and opportunities that is useful to the <b>same primary users</b> the Conceptual Framework targets — existing and potential investors, lenders, and other creditors — in making decisions about providing resources to the entity.</p>
+        <div class="callout c-why"><span class="ctag">Why this belongs next to financial reporting at all</span>
+          The underlying logic connects directly back to the Conceptual Framework's objective: investors and lenders are trying to assess an entity's ability to generate future cash flows. Sustainability-related risks — a carbon-intensive asset base facing new regulation, a supply chain exposed to climate disruption — can materially affect those future cash flows, even though they might not yet show up anywhere in the historical financial statements. IFRS S1 exists to close that gap.
+        </div>
+
+        <h3 class="sec">3. The four-pillar structure</h3>
+        <p>Disclosures are organised around four pillars, aligned with the internationally recognised TCFD (Task Force on Climate-related Financial Disclosures) framework:</p>
+        <table>
+          <tr><th>Pillar</th><th>Covers</th></tr>
+          <tr><td>Governance</td><td>The governance processes, controls, and procedures used to monitor and manage sustainability-related risks and opportunities</td></tr>
+          <tr><td>Strategy</td><td>The entity's approach to managing sustainability-related risks and opportunities, including their actual and potential effects on its business model, strategy, and cash flows</td></tr>
+          <tr><td>Risk management</td><td>The processes used to identify, assess, prioritise, and monitor sustainability-related risks and opportunities</td></tr>
+          <tr><td>Metrics and targets</td><td>Performance in relation to sustainability-related risks and opportunities, including progress toward any targets set (or required by law/regulation)</td></tr>
+        </table>
+
+        <h3 class="sec">4. Materiality and connectivity</h3>
+        <p>Sustainability-related information is material using the <b>same materiality concept</b> as the Conceptual Framework — if omitting, misstating, or obscuring it could reasonably be expected to influence primary users' decisions. IFRS S1 also requires these disclosures to be <b>connected</b> with the related financial statements — not published as a separate, siloed report, but linked to the numbers already being reported, typically at the same time.</p>
+
+        <h3 class="sec">5. Relationship to IFRS S2</h3>
+        <p>IFRS S1 sets out the general framework and cross-cutting requirements. <b>IFRS S2</b> (Climate-related Disclosures) is the first topic-specific standard issued under that framework, requiring detailed climate-specific disclosures (such as greenhouse gas emissions across Scope 1, 2, and 3, and climate resilience/scenario analysis). For FR purposes, knowing the S1/S2 relationship and the general four-pillar structure is the examinable level — the detailed technical content of S2 itself sits beyond FR's scope.</p>
+      </div>
+
+      <hr class="rule">
+      <div class="pillar-heading" id="pillar2">Pillar 2 · Group Accounting</div>
+      <div class="launch-grid">
+        <div class="launch-card"><div><div class="lname">Intro to Groups</div><div class="lref">Group structures, control</div></div><span class="launch-btn queued">Coming soon</span></div>
+        <div class="launch-card"><div><div class="lname">Consolidated SOFP</div><div class="lref">Full working methodology</div></div><span class="launch-btn queued">Coming soon</span></div>
+        <div class="launch-card"><div><div class="lname">Consolidated SOPL</div><div class="lref">Full working methodology</div></div><span class="launch-btn queued">Coming soon</span></div>
+        <div class="launch-card"><div><div class="lname">Acquisitions &amp; Disposals</div><div class="lref">Mid-year, step, disposal</div></div><span class="launch-btn queued">Coming soon</span></div>
+        <div class="launch-card"><div><div class="lname">Associates</div><div class="lref">IAS 28, equity method</div></div><span class="launch-btn queued">Coming soon</span></div>
+        <div class="launch-card"><div><div class="lname">Group Accounting Theory</div><div class="lref">IFRS 3 concepts</div></div><span class="launch-btn queued">Coming soon</span></div>
+      </div>
+
+      <hr class="rule">
+      <div class="pillar-heading" id="pillar3">Pillar 3 · Ratio Analysis &amp; Interpretation</div>
+      <div class="launch-grid">
+        <div class="launch-card"><div><div class="lname">Profitability Ratios</div><div class="lref">Margins, ROCE, ROE</div></div><span class="launch-btn queued">Coming soon</span></div>
+        <div class="launch-card"><div><div class="lname">Liquidity Ratios</div><div class="lref">Current, quick, cash</div></div><span class="launch-btn queued">Coming soon</span></div>
+        <div class="launch-card"><div><div class="lname">Efficiency Ratios</div><div class="lref">Days ratios, cycles</div></div><span class="launch-btn queued">Coming soon</span></div>
+        <div class="launch-card"><div><div class="lname">Gearing &amp; Investor Ratios</div><div class="lref">Gearing, interest cover, EPS-based</div></div><span class="launch-btn queued">Coming soon</span></div>
+        <div class="launch-card"><div><div class="lname">Interpretation Technique</div><div class="lref">DRLE writing framework</div></div><span class="launch-btn queued">Coming soon</span></div>
+      </div>
+
+    </div>
+
+    <footer>© M.SHANU — FR Notes Hub, Study Edition · ACCA Financial Reporting study reference</footer>
+  </main>
+</div>
+
+<script>
+// Single source of truth for in-page navigation: everything scrolls via JS,
+// nothing uses href="#..." — avoids the browser's "leaving this page?" link
+// interception that fires even on same-page anchors inside a sandboxed frame.
+function goToTarget(id){
+  const target = document.getElementById(id);
+  if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  if(window.innerWidth <= 900) document.body.classList.add('nav-collapsed');
+}
+
+// gather master topic list once (sidebar nav items)
+const links = Array.from(document.querySelectorAll('.navlink'));
+const topics = links.map(l => ({ text: l.textContent.trim(), target: l.dataset.target }));
+
+links.forEach(l => {
+  l.addEventListener('click', () => goToTarget(l.dataset.target));
+  l.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); goToTarget(l.dataset.target); } });
+});
+
+// Launch buttons on the overview cards
+document.querySelectorAll('button.launch-btn.done').forEach(btn => {
+  btn.addEventListener('click', () => goToTarget(btn.dataset.target));
+});
+
+// Pillar quick-jump buttons
+document.querySelectorAll('.pjump-btn').forEach(btn => {
+  btn.addEventListener('click', () => goToTarget(btn.dataset.target));
+});
+
+// topbar search + dropdown
+const topsearch = document.getElementById('topsearch');
+const results = document.getElementById('topsearch-results');
+function renderResults(q){
+  const query = q.toLowerCase().trim();
+  results.innerHTML = '';
+  if(!query){ results.classList.remove('active'); return; }
+  const matches = topics.filter(t => t.text.toLowerCase().includes(query)).slice(0, 15);
+  if(matches.length === 0){ results.classList.remove('active'); return; }
+  matches.forEach(m => {
+    const row = document.createElement('div');
+    row.className = 'tsr-item';
+    row.textContent = m.text;
+    row.addEventListener('click', () => {
+      goToTarget(m.target);
+      topsearch.value = '';
+      results.classList.remove('active');
+    });
+    results.appendChild(row);
+  });
+  results.classList.add('active');
+}
+topsearch.addEventListener('input', () => renderResults(topsearch.value));
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('.topsearch-wrap')) results.classList.remove('active');
+});
+
+// hamburger — purely toggles sidebar visibility, no navigation of any kind
+const hamburger = document.getElementById('hamburger');
+hamburger.addEventListener('click', () => document.body.classList.toggle('nav-collapsed'));
+// start collapsed on narrow screens
+if(window.innerWidth <= 900) document.body.classList.add('nav-collapsed');
+document.body.classList.remove('nav-collapsed-mobile-init');
+
+// scroll progress
+const bar = document.getElementById('progressbar');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  bar.style.width = pct + '%';
+});
+
+// active link highlight on scroll
+const sections = document.querySelectorAll('.chapter[id], .content > .hero[id]');
+const navMap = {};
+links.forEach(l => { navMap[l.dataset.target] = l; });
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const l = navMap[e.target.id];
+      if (l) l.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>
